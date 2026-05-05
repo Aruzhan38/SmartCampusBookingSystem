@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login - Smart Campus Booking</title>
+    <style>body{font-family:Arial,Helvetica,sans-serif;margin:40px}input,button{display:block;margin:10px 0;padding:8px;width:320px}button{width:340px;background:#2758a3;color:white;border:none;border-radius:4px;cursor:pointer}#message{color:red}</style>
+</head>
+<body>
+    <h1>Login</h1>
+    <div id="message"></div>
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button id="loginBtn">Login</button>
+    <p><a href="/register">Register</a> | <a href="/">Home</a></p>
+    <script>
+        const loginBtn = document.getElementById('loginBtn');
+        const message = document.getElementById('message');
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, password})
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                message.textContent = data.error || 'Login failed';
+                return;
+            }
+            localStorage.setItem('sc_token', data.token);
+            window.location.href = '/rooms-ui';
+        });
+    </script>
+</body>
+</html>

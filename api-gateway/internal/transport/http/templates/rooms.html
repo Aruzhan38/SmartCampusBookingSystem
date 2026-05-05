@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Rooms - Smart Campus Booking</title>
+    <style>body{font-family:Arial,Helvetica,sans-serif;margin:40px}button,input{margin:10px 0;padding:8px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:10px;text-align:left}th{background:#f5f5f5}</style>
+</head>
+<body>
+    <h1>Rooms</h1>
+    <button id="loadBtn">Load Rooms</button>
+    <button id="logoutBtn">Logout</button>
+    <div id="message"></div>
+    <table id="roomsTable" style="display:none">
+        <thead><tr><th>ID</th><th>Name</th><th>Capacity</th><th>Building</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    <p><a href="/">Home</a></p>
+    <script>
+        const token = localStorage.getItem('sc_token');
+        const message = document.getElementById('message');
+        const loadBtn = document.getElementById('loadBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const roomsTable = document.getElementById('roomsTable');
+        const tbody = roomsTable.querySelector('tbody');
+
+        if (!token) {
+            message.textContent = 'Please login first';
+        }
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('sc_token');
+            window.location.href = '/login';
+        });
+
+        loadBtn.addEventListener('click', async () => {
+            if (!token) {
+                message.textContent = 'Please login first';
+                return;
+            }
+            const res = await fetch('/rooms', {
+                headers: { Authorization: 'Bearer ' + token }
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                message.textContent = data.error || 'Failed to load rooms';
+                return;
+            }
+            tbody.innerHTML = '';
+            roomsTable.style.display = 'table';
+            if (data.rooms && data.rooms.length) {
+                data.rooms.forEach(room => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${room.id}</td><td>${room.number || room.name || ''}</td><td>${room.capacity || ''}</td><td>${room.building_name || ''}</td>`;
+                    tbody.appendChild(row);
+                });
+            } else {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4">No rooms found</td>';
+                tbody.appendChild(row);
+            }
+        });
+    </script>
+</body>
+</html>

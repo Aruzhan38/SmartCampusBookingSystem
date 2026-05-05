@@ -1,1 +1,1 @@
-package notificationService
+package main

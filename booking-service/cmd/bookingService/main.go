@@ -1,1 +1,1 @@
-package bookingService
+package main

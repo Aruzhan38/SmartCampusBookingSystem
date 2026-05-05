@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register - Smart Campus Booking</title>
+    <style>body{font-family:Arial,Helvetica,sans-serif;margin:40px}input,select,button{display:block;margin:10px 0;padding:8px;width:320px}button{width:340px;background:#2a8a44;color:white;border:none;border-radius:4px;cursor:pointer}#message{color:red}</style>
+</head>
+<body>
+    <h1>Register</h1>
+    <div id="message"></div>
+    <input id="full_name" type="text" placeholder="Full name" />
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <select id="role">
+        <option value="Student">Student</option>
+        <option value="Professor">Professor</option>
+        <option value="Admin">Admin</option>
+    </select>
+    <button id="registerBtn">Register</button>
+    <p><a href="/login">Login</a> | <a href="/">Home</a></p>
+    <script>
+        const registerBtn = document.getElementById('registerBtn');
+        const message = document.getElementById('message');
+        registerBtn.addEventListener('click', async () => {
+            const full_name = document.getElementById('full_name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({full_name, email, password, role})
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                message.textContent = data.error || 'Registration failed';
+                return;
+            }
+            window.location.href = '/login';
+        });
+    </script>
+</body>
+</html>
