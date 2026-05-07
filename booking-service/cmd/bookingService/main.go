@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"booking-service/internal/config"
+	"booking-service/internal/domain"
 	"booking-service/internal/repository"
 	grpcServer "booking-service/internal/transport/grpc"
 	"booking-service/internal/usecase"
@@ -24,6 +25,10 @@ func main() {
 	}), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database: ", err)
+	}
+
+	if err := db.AutoMigrate(&domain.Booking{}); err != nil {
+		log.Fatal("failed to migrate database: ", err)
 	}
 
 	repo := repository.NewBookingRepository(db)
