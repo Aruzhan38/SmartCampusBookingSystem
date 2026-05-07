@@ -36,7 +36,7 @@ services:
   booking-service:
     build: ./booking-service
     environment:
-      DB_URL: postgres://user:password@postgres:5432/smartcampus?sslmode=disable&search_path=bookings
+      DB_URL: postgres://user:password@postgres:5432/smartcampus?sslmode=disable&search_path=booking_service
       GRPC_PORT: 50053
     ports:
       - "50053:50053"

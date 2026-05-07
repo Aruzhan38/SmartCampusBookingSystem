@@ -3,7 +3,7 @@ module api-gateway
 go 1.25.0
 
 require (
-	github.com/Aruzhan38/smart-campus-generated v0.0.0 // replace with actual
+	github.com/Aruzhan38/smart-campus-generated v0.0.0-20260505053624-9c136d2a98e4
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/viper v1.16.0
@@ -47,5 +47,3 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/Aruzhan38/smart-campus-generated => ../smart-campus-generated
