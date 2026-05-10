@@ -5,31 +5,45 @@ import (
 	"api-gateway/internal/config"
 	"api-gateway/internal/middleware"
 	gatewayhttp "api-gateway/internal/transport/http"
+	"context"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+func dialGRPC(address string) (*grpc.ClientConn, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	return grpc.DialContext(
+		ctx,
+		address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+	)
+}
+
 func main() {
 	cfg := config.Load()
 	// Connect to User Service
-	userConn, err := grpc.Dial(cfg.UserServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userConn, err := dialGRPC(cfg.UserServiceAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer userConn.Close()
 	userClient := client.NewUserClient(userConn)
 	// Connect to Room Service
-	roomConn, err := grpc.Dial(cfg.RoomServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	roomConn, err := dialGRPC(cfg.RoomServiceAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer roomConn.Close()
 	roomClient := client.NewRoomClient(roomConn)
 	// Connect to Booking Service
-	bookingConn, err := grpc.Dial(cfg.BookingServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	bookingConn, err := dialGRPC(cfg.BookingServiceAddr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,6 +64,7 @@ func main() {
 	r.GET("/register", webHandler.RegisterPage)
 	r.GET("/rooms-ui", webHandler.RoomsPage)
 	r.GET("/bookings-ui", webHandler.BookingsPage)
+	r.GET("/bookings", webHandler.BookingsPage)
 
 	r.POST("/api/register", userHandler.Register)
 	r.POST("/api/login", userHandler.Login)
