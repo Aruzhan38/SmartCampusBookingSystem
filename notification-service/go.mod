@@ -11,7 +11,7 @@ require (
 )
 
 require (
-	github.com/Aruzhan38/smart-campus-generated v0.0.0-20260505053624-9c136d2a98e4 // indirect
+	github.com/Aruzhan38/smart-campus-generated v0.0.0-20260511194229-e1eef306c816 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
