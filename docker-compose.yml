@@ -11,44 +11,53 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d smartcampus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   user-service:
     build: ./user-service
     environment:
-      DB_URL: postgres://user:password@postgres:5432/smartcampus?sslmode=disable&search_path=users
+      DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/user_db?sslmode=require&search_path=public
       JWT_SECRET: your-secret-key
       GRPC_PORT: 50051
     ports:
       - "50051:50051"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   room-service:
     build: ./room-service
     environment:
-      DB_URL: postgres://user:password@postgres:5432/smartcampus?sslmode=disable&search_path=rooms
+      DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/room_db?sslmode=require&search_path=public
       GRPC_PORT: 50052
     ports:
       - "50052:50052"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   booking-service:
     build: ./booking-service
     environment:
-      DB_URL: postgres://user:password@postgres:5432/smartcampus?sslmode=disable&search_path=booking_service
+      DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/booking_db?sslmode=require&search_path=public
       GRPC_PORT: 50053
     ports:
       - "50053:50053"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
-  notification-service:
-    build: ./notification-service
-    environment:
-      GRPC_PORT: 50054
-    ports:
-      - "50054:50054"
+  # notification-service temporarily disabled until proto/notification is available
+  # notification-service:
+  #   build: ./notification-service
+  #   environment:
+  #     GRPC_PORT: 50054
+  #   ports:
+  #     - "50054:50054"
 
   api-gateway:
     build: ./api-gateway
@@ -61,9 +70,12 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - user-service
-      - room-service
-      - booking-service
+      user-service:
+        condition: service_started
+      room-service:
+        condition: service_started
+      booking-service:
+        condition: service_started
 
 volumes:
   postgres_data:

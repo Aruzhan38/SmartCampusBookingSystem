@@ -3,275 +3,117 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Campus Booking System</title>
+    <title>Smart Campus</title>
     <style>
-        :root {
-            --bg: #f5f7fb;
-            --surface: #ffffff;
-            --ink: #102033;
-            --muted: #667085;
-            --line: #dbe3ef;
-            --brand: #2563eb;
-            --brand-dark: #1e40af;
-            --indigo: #4f46e5;
-            --mint: #0f766e;
-            --amber: #b45309;
-            --shadow: 0 18px 45px rgba(31, 41, 55, 0.12);
-            --radius: 18px;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top left, #dbeafe 0, transparent 32%), var(--bg);
-            color: var(--ink);
-        }
-        .nav {
-            min-height: 72px;
-            padding: 0 7vw;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(219, 227, 239, 0.8);
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(14px);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            letter-spacing: 0;
-        }
-        .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            background: linear-gradient(135deg, var(--brand), var(--indigo));
-            color: white;
-            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.28);
-        }
-        .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-        a { color: inherit; }
-        .btn {
-            min-height: 42px;
-            padding: 11px 18px;
-            border: 0;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 700;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-        }
-        .btn:hover { transform: translateY(-1px); }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--brand), var(--indigo));
-            color: white;
-            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.28);
-        }
-        .btn-soft {
-            color: var(--brand-dark);
-            background: #eaf1ff;
-        }
-        .hero {
-            padding: 72px 7vw 40px;
-            display: grid;
-            grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
-            gap: 42px;
-            align-items: center;
-        }
-        .eyebrow {
-            color: var(--mint);
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.78rem;
-            letter-spacing: 0.08em;
-            margin-bottom: 16px;
-        }
-        h1 {
-            margin: 0;
-            max-width: 820px;
-            font-size: clamp(2.3rem, 5vw, 4.7rem);
-            line-height: 0.98;
-            letter-spacing: 0;
-        }
-        .lead {
-            max-width: 690px;
-            color: var(--muted);
-            font-size: 1.14rem;
-            line-height: 1.75;
-            margin: 24px 0 30px;
-        }
-        .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
-        .campus-panel {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 22px;
-        }
-        .schedule-card {
-            border-radius: 14px;
-            background: #f8fafc;
-            border: 1px solid var(--line);
-            padding: 18px;
-            margin-top: 14px;
-            display: grid;
-            gap: 12px;
-        }
-        .schedule-row {
-            display: grid;
-            grid-template-columns: 92px 1fr auto;
-            gap: 12px;
-            align-items: center;
-            padding: 12px;
-            background: white;
-            border: 1px solid #e7edf6;
-            border-radius: 12px;
-        }
-        .time { color: var(--brand-dark); font-weight: 800; }
-        .room { color: var(--muted); }
-        .tag {
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 0.78rem;
-            font-weight: 800;
-            background: #dcfce7;
-            color: #166534;
-        }
-        .section { padding: 26px 7vw 70px; }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 18px;
-        }
-        .feature-card {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            padding: 22px;
-            box-shadow: 0 12px 28px rgba(31, 41, 55, 0.08);
-        }
-        .feature-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            display: grid;
-            place-items: center;
-            margin-bottom: 16px;
-            background: #eef2ff;
-            color: var(--indigo);
-            font-weight: 900;
-        }
-        .feature-card:nth-child(2) .feature-icon { background: #ecfeff; color: var(--mint); }
-        .feature-card:nth-child(3) .feature-icon { background: #fff7ed; color: var(--amber); }
-        .feature-card h3 { margin: 0 0 8px; font-size: 1.05rem; }
-        .feature-card p { margin: 0; color: var(--muted); line-height: 1.55; }
-        @media (max-width: 900px) {
-            .hero { grid-template-columns: 1fr; padding-top: 44px; }
-            .feature-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .nav { align-items: flex-start; padding-top: 16px; padding-bottom: 16px; flex-direction: column; gap: 14px; }
-        }
-        @media (max-width: 560px) {
-            .feature-grid { grid-template-columns: 1fr; }
-            .schedule-row { grid-template-columns: 1fr; }
-            .btn { width: 100%; }
-            .hero-actions, .nav-links { width: 100%; }
-        }
+        :root { --bg:#eef5ff; --sidebar:#fbfdff; --card:#fbfcff; --text:#2d3748; --muted:#8da0bd; --line:#dde8f6; --blue:#5b9dec; --teal:#65c8a7; --danger:#ef4444; --success:#15803d; --amber:#b45309; --shadow:0 16px 40px rgba(61,83,120,.08); --radius:22px; }
+        *{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+        .app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;padding:28px 20px;background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:34px}
+        .brand{display:flex;align-items:center;gap:14px;font-size:1.25rem;font-weight:900;text-decoration:none;color:var(--text)}.brand-icon{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;color:white;background:linear-gradient(135deg,var(--blue),var(--teal));font-weight:900}
+        .nav{display:grid;gap:10px}.nav a{min-height:52px;padding:0 16px;border-radius:16px;display:flex;align-items:center;gap:14px;color:#617492;font-weight:800;text-decoration:none;transition:.18s ease}.nav a:hover{background:#edf5ff;color:var(--text)}.nav a.active{background:#e4effc;color:var(--text);outline:2px solid #111827}
+        .auth-links,.user-card{margin-top:auto;display:grid;gap:10px}.user-card{display:none;padding:16px;border-radius:18px;background:#f4f9ff;border:1px solid var(--line)}.user-card strong{display:block}.user-card span{color:var(--muted);font-weight:750;font-size:.9rem}.admin-only{display:none}
+        .main{min-width:0}.topbar{height:72px;border-bottom:1px solid var(--line);background:rgba(251,253,255,.84);display:flex;justify-content:flex-end;align-items:center;padding:0 28px}.bell{font-size:.95rem;color:#617492;font-weight:800}.content{width:min(1280px,calc(100% - 64px));margin:0 auto;padding:36px 0 64px}
+        .hero{margin-bottom:30px}h1{margin:0;font-size:clamp(2.4rem,4vw,3.6rem);line-height:1}.subtle{color:var(--muted);margin:12px 0 0;font-size:1.08rem;font-weight:650}
+        .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:32px 0}.stat,.card{background:var(--card);border:1px solid #edf3fb;border-radius:var(--radius);box-shadow:var(--shadow)}.stat{padding:22px;min-height:136px;display:grid;align-content:center}.stat-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;margin-bottom:16px;color:var(--blue);background:#e6f2ff;font-weight:900}.stat:nth-child(2) .stat-icon{color:var(--teal);background:#e8fbf5}.stat:nth-child(3) .stat-icon{color:var(--amber);background:#fff7e8}.stat strong{font-size:1.8rem;line-height:1}.stat span{margin-top:8px;color:var(--muted);font-weight:750}
+        .dashboard{display:grid;grid-template-columns:1fr 420px;gap:22px;align-items:stretch}.card{padding:28px}.week{min-height:330px}.card h2{margin:0 0 18px;font-size:1.1rem}.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:28px}.day{min-height:86px;border-radius:18px;display:grid;place-items:center;color:#617492;font-weight:850}.day.active{border:2px solid #8bc1ff;background:#f2f8ff;color:var(--text)}.day small{display:block;color:var(--muted);margin-bottom:8px}.empty{color:var(--muted);text-align:center;font-weight:800;padding:28px 0}
+        .booking-list{display:grid;gap:12px}.booking-item{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:14px 16px;border-radius:16px;background:#f7fbff;border:1px solid var(--line)}.booking-item strong{display:block;margin-bottom:4px}.booking-item span{color:var(--muted);font-weight:750}.status-pill{padding:6px 10px;border-radius:999px;background:#dcfce7;color:var(--success);font-weight:900;font-size:.82rem}.status-pill.cancelled{background:#fee4e2;color:var(--danger)}.status-pill.rejected{background:#f2f4f7;color:#475467}
+        .quick{display:grid;gap:16px}.action-card{border-radius:var(--radius);padding:26px;text-decoration:none;color:var(--text);min-height:162px;display:grid;align-content:center;box-shadow:var(--shadow);transition:transform .18s ease}.action-card:hover{transform:translateY(-2px)}.action-card.primary{color:white;background:linear-gradient(135deg,var(--blue),var(--teal))}.action-card.secondary{background:var(--card);border:1px solid #edf3fb}.action-icon{width:50px;height:50px;border-radius:16px;display:grid;place-items:center;margin-bottom:18px;background:rgba(255,255,255,.24);font-weight:900}.secondary .action-icon{background:#e6f2ff;color:var(--blue)}.action-card h3{margin:0 0 8px}.action-card p{margin:0;opacity:.78;font-weight:750}
+        .btn{min-height:50px;border:0;border-radius:16px;padding:0 20px;display:flex;align-items:center;justify-content:center;color:var(--text);background:#e8f2ff;font-weight:900;text-decoration:none}.btn.primary{color:white;background:linear-gradient(135deg,var(--blue),var(--teal))}
+        @media(max-width:1120px){.stats{grid-template-columns:repeat(2,1fr)}.dashboard{grid-template-columns:1fr}}@media(max-width:820px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto}.content{width:min(100% - 28px,1280px)}.stats,.days{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
-    <header class="nav">
-        <div class="brand">
-            <div class="brand-mark">SC</div>
-            <span>Smart Campus</span>
-        </div>
-        <nav class="nav-links">
-            <a class="btn btn-soft" href="/rooms-ui">Rooms</a>
-            <a class="btn btn-soft" href="/bookings-ui">My Bookings</a>
-            <a class="btn btn-primary" href="/login">Login</a>
-        </nav>
-    </header>
-
-    <main>
-        <section class="hero">
-            <div>
-                <div class="eyebrow">Campus spaces, coordinated</div>
-                <h1>Smart Campus Booking System</h1>
-                <p class="lead">
-                    Find available rooms, manage study sessions, and prevent overlapping bookings with a simple dashboard built for campus teams.
-                </p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" href="/register">Register</a>
-                    <a class="btn btn-soft" href="/login">Login</a>
-                    <a class="btn btn-soft" href="/rooms-ui">Rooms</a>
-                    <a class="btn btn-soft" href="/bookings-ui">My Bookings</a>
-                </div>
+    <div class="app">
+        <aside class="sidebar">
+            <a class="brand" href="/"><span class="brand-icon">SC</span><span>Smart Campus</span></a>
+            <nav class="nav">
+                <a class="active" href="/">Dashboard</a>
+                <a href="/rooms-ui">Rooms</a>
+                <a href="/bookings-ui">My Bookings</a>
+                <a class="admin-only" href="/admin-ui">Admin</a>
+                <a class="private-link" href="/profile-ui">Profile</a>
+            </nav>
+            <div id="authLinks" class="auth-links">
+                <a class="btn primary" href="/login">Login</a>
+                <a class="btn" href="/register">Register</a>
             </div>
-            <aside class="campus-panel" aria-label="Today's campus schedule preview">
-                <div class="eyebrow">Live booking preview</div>
-                <div class="schedule-card">
-                    <div class="schedule-row">
-                        <div class="time">10:00</div>
-                        <div>
-                            <strong>B401</strong>
-                            <div class="room">Group study session</div>
-                        </div>
-                        <span class="tag">Confirmed</span>
-                    </div>
-                    <div class="schedule-row">
-                        <div class="time">12:30</div>
-                        <div>
-                            <strong>A214</strong>
-                            <div class="room">Lecture room reservation</div>
-                        </div>
-                        <span class="tag">Open</span>
-                    </div>
-                    <div class="schedule-row">
-                        <div class="time">15:00</div>
-                        <div>
-                            <strong>C105</strong>
-                            <div class="room">Project meeting</div>
-                        </div>
-                        <span class="tag">Ready</span>
-                    </div>
-                </div>
-            </aside>
-        </section>
-
-        <section class="section">
-            <div class="feature-grid">
-                <article class="feature-card">
-                    <div class="feature-icon">01</div>
-                    <h3>Room Search</h3>
-                    <p>Search rooms by minimum capacity and quickly compare available campus spaces.</p>
-                </article>
-                <article class="feature-card">
-                    <div class="feature-icon">02</div>
-                    <h3>Booking Management</h3>
-                    <p>Create, review, cancel, and update booking statuses from one focused workspace.</p>
-                </article>
-                <article class="feature-card">
-                    <div class="feature-icon">03</div>
-                    <h3>Conflict Prevention</h3>
-                    <p>Overlapping reservations are blocked before they disrupt students or staff.</p>
-                </article>
-                <article class="feature-card">
-                    <div class="feature-icon">04</div>
-                    <h3>Secure Login</h3>
-                    <p>Protected room and booking endpoints use the saved access token for requests.</p>
-                </article>
+            <div id="userCard" class="user-card">
+                <strong id="sideName">User</strong>
+                <span id="sideRole">Role</span>
+                <a class="btn" href="/profile-ui">Profile</a>
+                <button id="logoutBtn" class="btn" type="button">Logout</button>
             </div>
-        </section>
-    </main>
+        </aside>
+        <main class="main">
+            <div class="topbar"><span class="bell">Notifications</span></div>
+            <section class="content">
+                <header class="hero">
+                    <h1 id="welcomeTitle">Hello, Student</h1>
+                    <p class="subtle">Here's your campus booking overview.</p>
+                </header>
+                <section class="stats">
+                    <article class="stat"><div class="stat-icon">B</div><strong id="totalBookings">0</strong><span>Total Bookings</span></article>
+                    <article class="stat"><div class="stat-icon">U</div><strong id="upcomingBookings">0</strong><span>Upcoming</span></article>
+                    <article class="stat"><div class="stat-icon">T</div><strong id="todayBookings">0</strong><span>Today</span></article>
+                    <article class="stat"><div class="stat-icon">R</div><strong id="roomCount">0</strong><span>Rooms</span></article>
+                </section>
+                <section class="dashboard">
+                    <article class="card week">
+                        <h2>This Week</h2>
+                        <div class="days">
+                            <div class="day active"><div><small>Mon</small>11</div></div><div class="day"><div><small>Tue</small>12</div></div><div class="day"><div><small>Wed</small>13</div></div><div class="day"><div><small>Thu</small>14</div></div><div class="day"><div><small>Fri</small>15</div></div><div class="day"><div><small>Sat</small>16</div></div><div class="day"><div><small>Sun</small>17</div></div>
+                        </div>
+                        <div id="weekSummary" class="empty">Loading your bookings...</div>
+                    </article>
+                    <aside class="quick">
+                        <a class="action-card primary" href="/rooms-ui"><div class="action-icon">+</div><h3>Book a Room</h3><p>Find and reserve a space</p></a>
+                        <a class="action-card secondary" href="/bookings-ui"><div class="action-icon">M</div><h3>My Bookings</h3><p>View and manage</p></a>
+                    </aside>
+                </section>
+            </section>
+        </main>
+    </div>
+    <script>
+        function decodeToken(){const token=localStorage.getItem('sc_token');if(!token)return null;try{const base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(base64))))}catch(e){return null}}
+        function displayName(user){return localStorage.getItem('sc_full_name') || (user && user.email ? user.email.split('@')[0] : 'Student')}
+        function authHeaders(){return {'Content-Type':'application/json',Authorization:'Bearer '+localStorage.getItem('sc_token')}}
+        async function parseResponse(res){const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||data.message||'Request failed');return data}
+        function getBookings(data){if(data.bookings)return data.bookings;if(data.Bookings)return data.Bookings;if(data.booking)return [data.booking];if(data.Booking)return [data.Booking];return []}
+        function getRooms(data){return data.rooms||data.Rooms||[]}
+        function value(obj,snake,camel){return obj[snake]??obj[camel]??''}
+        function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+        function formatTime(value){const date=new Date(value);if(Number.isNaN(date.getTime()))return value;return date.toLocaleString()}
+        function renderWeek(bookings){
+            const target=document.getElementById('weekSummary');
+            const upcoming=bookings.filter((booking)=>String(value(booking,'status','status')).toUpperCase()!=='CANCELLED').sort((a,b)=>new Date(value(a,'start_time','startTime'))-new Date(value(b,'start_time','startTime'))).slice(0,3);
+            if(!upcoming.length){target.className='empty';target.textContent='No upcoming bookings. Open Rooms to make your next booking.';return}
+            target.className='booking-list'; target.innerHTML='';
+            upcoming.forEach((booking)=>{const status=String(value(booking,'status','status')||'PENDING');const statusClass=status.toLowerCase();const item=document.createElement('div');item.className='booking-item';item.innerHTML=`<div><strong>Room ${value(booking,'room_id','roomId')}</strong><span>${formatTime(value(booking,'start_time','startTime'))} - ${formatTime(value(booking,'end_time','endTime'))}</span></div><span class="status-pill ${statusClass}">${status}</span>`;target.appendChild(item);});
+        }
+        async function loadDashboard(user){
+            if(!user){document.getElementById('weekSummary').textContent='Login to see your booking overview.';return}
+            try{
+                const [bookingData,roomData]=await Promise.all([fetch('/bookings/my?user_id='+encodeURIComponent(user.user_id),{headers:authHeaders()}).then(parseResponse),fetch('/rooms',{headers:authHeaders()}).then(parseResponse)]);
+                const bookings=getBookings(bookingData); const rooms=getRooms(roomData); const now=new Date();
+                const active=bookings.filter((booking)=>String(value(booking,'status','status')).toUpperCase()!=='CANCELLED');
+                const upcoming=active.filter((booking)=>new Date(value(booking,'end_time','endTime'))>=now);
+                const today=active.filter((booking)=>sameDay(new Date(value(booking,'start_time','startTime')),now));
+                document.getElementById('totalBookings').textContent=bookings.length;
+                document.getElementById('upcomingBookings').textContent=upcoming.length;
+                document.getElementById('todayBookings').textContent=today.length;
+                document.getElementById('roomCount').textContent=rooms.length;
+                renderWeek(bookings);
+            }catch(error){document.getElementById('weekSummary').className='empty';document.getElementById('weekSummary').textContent=error.message}
+        }
+        const user=decodeToken();
+        if(user){
+            const role=String(user.role||'Student'); const name=displayName(user);
+            document.getElementById('authLinks').style.display='none'; document.getElementById('userCard').style.display='grid';
+            document.getElementById('sideName').textContent=name; document.getElementById('sideRole').textContent=role; document.getElementById('welcomeTitle').textContent='Hello, '+name;
+            if(role.toUpperCase()==='ADMIN'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex')}
+        }
+        document.querySelectorAll('.private-link').forEach(link=>link.addEventListener('click',(event)=>{if(!decodeToken()){event.preventDefault();window.location.href='/login'}}));
+        const logoutBtn=document.getElementById('logoutBtn'); if(logoutBtn){logoutBtn.addEventListener('click',()=>{localStorage.removeItem('sc_token');localStorage.removeItem('sc_user');window.location.href='/login'})}
+        loadDashboard(user);
+    </script>
 </body>
 </html>

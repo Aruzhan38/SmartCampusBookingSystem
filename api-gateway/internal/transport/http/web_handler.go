@@ -46,3 +46,11 @@ func (h *WebHandler) RoomsPage(c *gin.Context) {
 func (h *WebHandler) BookingsPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "bookings.html", nil)
 }
+
+func (h *WebHandler) AdminPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "admin.html", nil)
+}
+
+func (h *WebHandler) ProfilePage(c *gin.Context) {
+	c.HTML(http.StatusOK, "profile.html", nil)
+}

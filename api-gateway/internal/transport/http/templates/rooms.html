@@ -3,445 +3,397 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rooms - Smart Campus Booking</title>
+    <title>Rooms - Smart Campus</title>
     <style>
         :root {
-            --bg: #f5f7fb;
-            --surface: #ffffff;
-            --ink: #102033;
-            --muted: #667085;
-            --line: #dbe3ef;
-            --brand: #2563eb;
-            --brand-dark: #1e40af;
-            --indigo: #4f46e5;
-            --teal: #0f766e;
-            --amber: #b45309;
-            --danger: #b42318;
-            --success: #087443;
-            --shadow: 0 14px 34px rgba(31, 41, 55, 0.1);
+            --bg: #eef5ff;
+            --sidebar: #fbfdff;
+            --card: #fbfcff;
+            --text: #2d3748;
+            --muted: #8da0bd;
+            --line: #dde8f6;
+            --blue: #5b9dec;
+            --teal: #65c8a7;
+            --danger: #ef4444;
+            --success: #15803d;
+            --shadow: 0 16px 40px rgba(61, 83, 120, 0.08);
+            --radius: 22px;
         }
         * { box-sizing: border-box; }
         body {
             margin: 0;
+            min-height: 100vh;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background: var(--bg);
-            color: var(--ink);
+            color: var(--text);
         }
-        .nav {
-            min-height: 72px;
-            padding: 0 5vw;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(219, 227, 239, 0.86);
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(14px);
+        .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+        .sidebar {
             position: sticky;
             top: 0;
-            z-index: 10;
+            height: 100vh;
+            padding: 28px 20px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+            gap: 34px;
         }
-        .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; }
-        .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
+        .brand { display: flex; align-items: center; gap: 14px; font-size: 1.25rem; font-weight: 900; text-decoration: none; color: var(--text); }
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
             display: grid;
             place-items: center;
             color: white;
-            background: linear-gradient(135deg, var(--brand), var(--indigo));
-        }
-        .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn {
-            min-height: 40px;
-            padding: 10px 14px;
-            border: 0;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 850;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: var(--ink);
-            background: #eef2ff;
-        }
-        .btn-primary { background: linear-gradient(135deg, var(--brand), var(--indigo)); color: white; }
-        .btn-teal { background: #ccfbf1; color: #115e59; }
-        .btn-danger { background: #fee4e2; color: var(--danger); }
-        .btn:disabled { opacity: 0.65; cursor: wait; }
-        .page {
-            padding: 34px 5vw 56px;
-        }
-        .page-head {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            align-items: flex-end;
-            margin-bottom: 24px;
-        }
-        h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; }
-        .subtle { color: var(--muted); line-height: 1.55; margin: 10px 0 0; }
-        .message {
-            display: none;
-            margin: 0 0 18px;
-            padding: 13px 15px;
-            border-radius: 12px;
-            font-weight: 800;
-            line-height: 1.45;
-        }
-        .message.error { display: block; color: var(--danger); background: #fef3f2; border: 1px solid #fecdca; }
-        .message.success { display: block; color: var(--success); background: #ecfdf3; border: 1px solid #abefc6; }
-        .message.info { display: block; color: var(--brand-dark); background: #eff6ff; border: 1px solid #bfdbfe; }
-        .grid {
-            display: grid;
-            grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
-            gap: 22px;
-            align-items: start;
-        }
-        .panel {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-        }
-        .panel + .panel { margin-top: 18px; }
-        .panel h2 { margin: 0 0 14px; font-size: 1.08rem; }
-        label { display: block; margin: 12px 0 7px; color: #344054; font-weight: 850; }
-        input {
-            width: 100%;
-            min-height: 42px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 0 12px;
-            font: inherit;
-            background: #fbfdff;
-            color: var(--ink);
-        }
-        input:focus {
-            outline: 3px solid rgba(37, 99, 235, 0.14);
-            border-color: var(--brand);
-        }
-        .form-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .table-wrap {
-            overflow-x: auto;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 720px;
-            background: white;
-        }
-        th, td {
-            padding: 13px 14px;
-            text-align: left;
-            border-bottom: 1px solid #e7edf6;
-            vertical-align: top;
-        }
-        th {
-            background: #f8fafc;
-            color: #344054;
-            font-size: 0.82rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-        tr:last-child td { border-bottom: 0; }
-        .room-id {
-            display: inline-flex;
-            min-width: 34px;
-            height: 28px;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            background: #eaf1ff;
-            color: var(--brand-dark);
+            background: linear-gradient(135deg, var(--blue), var(--teal));
             font-weight: 900;
         }
+        .nav { display: grid; gap: 10px; }
+        .nav a, .logout {
+            min-height: 52px;
+            padding: 0 16px;
+            border: 0;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: transparent;
+            color: #617492;
+            font: inherit;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.18s ease;
+        }
+        .nav a:hover, .logout:hover { background: #edf5ff; color: var(--text); }
+        .nav a.active { background: #e4effc; color: var(--text); outline: 2px solid #111827; }
+        .logout { margin-top: auto; color: var(--danger); }
+        .admin-only { display: none; }
+        .main { min-width: 0; }
+        .topbar {
+            height: 72px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(251, 253, 255, 0.84);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 28px;
+        }
+        .bell { font-size: 1.35rem; color: #617492; }
+        .content { width: min(1280px, calc(100% - 64px)); margin: 0 auto; padding: 36px 0 64px; }
+        .page-head { margin-bottom: 26px; }
+        h1 { margin: 0; font-size: clamp(2rem, 3vw, 2.75rem); line-height: 1; }
+        .subtle { color: var(--muted); margin: 10px 0 0; font-size: 1.05rem; font-weight: 650; }
+        .alert {
+            display: none;
+            margin: 0 0 18px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            font-weight: 800;
+        }
+        .alert.error { display: block; color: #b42318; background: #fef3f2; border: 1px solid #fecdca; }
+        .alert.success { display: block; color: var(--success); background: #ecfdf3; border: 1px solid #abefc6; }
+        .alert.info { display: block; color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
+        .filter-card, .modal-card, .room-card {
+            background: var(--card);
+            border: 1px solid #edf3fb;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .filter-card { padding: 22px; margin-bottom: 26px; }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 220px auto;
+            gap: 16px;
+            align-items: end;
+        }
+        label { display: block; color: #617492; font-weight: 850; margin-bottom: 8px; }
+        input {
+            width: 100%;
+            min-height: 50px;
+            border: 1px solid #d8e5f5;
+            border-radius: 16px;
+            padding: 0 16px;
+            background: white;
+            color: var(--text);
+            font: inherit;
+        }
+        input:focus { outline: 0; border-color: #8bc1ff; box-shadow: 0 0 0 4px rgba(91, 157, 236, 0.16); }
+        .btn {
+            min-height: 50px;
+            border: 0;
+            border-radius: 16px;
+            padding: 0 20px;
+            font: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+        .btn-primary { color: white; background: linear-gradient(135deg, var(--blue), var(--teal)); }
+        .btn-soft { color: #1d4ed8; background: #e8f2ff; }
+        .btn:disabled { opacity: 0.65; cursor: wait; transform: none; }
+        .layout { display: block; }
+        .rooms-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+        .room-card { padding: 26px; }
+        .room-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 16px; }
+        .room-card h3 { margin: 0 0 6px; font-size: 1.08rem; }
+        .room-card p { margin: 0; color: var(--muted); font-weight: 700; }
+        .slots { padding: 8px 12px; border-radius: 999px; background: #dcfce7; color: #166534; font-weight: 850; white-space: nowrap; }
+        .room-meta { display: flex; gap: 14px; color: #617492; margin: 18px 0 22px; font-weight: 800; flex-wrap: wrap; }
+        .room-card .btn { width: 100%; }
+        .modal-backdrop { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 28px; background: rgba(28, 44, 70, .28); z-index: 50; }
+        .modal-backdrop.open { display: flex; }
+        .modal-card { width: min(840px, 100%); padding: 30px; }
+        .modal-head { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 24px; }
+        .modal-icon { width: 62px; height: 62px; border-radius: 18px; display: grid; place-items: center; color: white; background: linear-gradient(135deg, var(--blue), var(--teal)); font-weight: 900; }
+        .time-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .time-chip { min-height: 42px; border: 1px solid #d8e5f5; border-radius: 14px; background: white; color: var(--text); font-weight: 850; cursor: pointer; }
+        .time-chip.selected { border-color: #8bc1ff; background: #edf7ff; }
+        .form-grid { display: grid; gap: 14px; }
         .empty {
-            padding: 28px;
+            min-height: 220px;
+            display: grid;
+            place-items: center;
             color: var(--muted);
-            text-align: center;
+            font-weight: 800;
+            background: var(--card);
+            border-radius: var(--radius);
+            border: 1px dashed #cbd9ee;
         }
-        @media (max-width: 980px) {
-            .grid { grid-template-columns: 1fr; }
-            .page-head { align-items: flex-start; flex-direction: column; }
-            .nav { align-items: flex-start; flex-direction: column; gap: 14px; padding-top: 16px; padding-bottom: 16px; }
+        @media (max-width: 1180px) {
+            .layout { grid-template-columns: 1fr; }
+            .rooms-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
-        @media (max-width: 560px) {
-            .nav-actions, .btn { width: 100%; }
-            .form-actions .btn { flex: 1 1 100%; }
+        @media (max-width: 820px) {
+            .app { grid-template-columns: 1fr; }
+            .sidebar { position: static; height: auto; }
+            .content { width: min(100% - 28px, 1280px); }
+            .filter-grid, .rooms-grid, .time-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <header class="nav">
-        <div class="brand"><div class="brand-mark">SC</div><span>Rooms Dashboard</span></div>
-        <nav class="nav-actions">
-            <a class="btn" href="/">Home</a>
-            <a class="btn" href="/bookings-ui">My Bookings</a>
-            <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
-        </nav>
-    </header>
+    <div class="app">
+        <aside class="sidebar">
+            <a class="brand" href="/"><span class="brand-icon">SC</span><span>Smart Campus</span></a>
+            <nav class="nav">
+                <a href="/">▦ Dashboard</a>
+                <a class="active" href="/rooms-ui">▥ Rooms</a>
+                <a href="/bookings-ui">▣ My Bookings</a>
+                <a href="/profile-ui">♙ Profile</a>
+                <a class="admin-only" href="/admin-ui">◇ Admin</a>
+            </nav>
+            <button id="logoutBtn" class="logout" type="button">↪ Logout</button>
+        </aside>
 
-    <main class="page">
-        <div class="page-head">
-            <div>
-                <h1>Campus Rooms</h1>
-                <p class="subtle">Create rooms, search by capacity, and update room details from one dashboard.</p>
-            </div>
-            <button id="loadBtn" class="btn btn-primary" type="button">Load Rooms</button>
-        </div>
+        <main class="main">
+            <div class="topbar"><span class="bell">♢</span></div>
+            <section class="content">
+                <header class="page-head">
+                    <h1>Find a Room</h1>
+                    <p class="subtle">Browse available spaces on campus and reserve a room.</p>
+                </header>
 
-        <div id="message" class="message"></div>
+                <div id="message" class="alert"></div>
 
-        <section class="grid">
-            <aside>
-                <div class="panel">
-                    <h2>Create Room</h2>
-                    <form id="createRoomForm">
-                        <label for="create_room_number">Room number</label>
-                        <input id="create_room_number" required placeholder="B401" />
-
-                        <label for="create_capacity">Capacity</label>
-                        <input id="create_capacity" type="number" min="1" required placeholder="45" />
-
-                        <label for="create_building_id">Building ID</label>
-                        <input id="create_building_id" required placeholder="1" />
-
-                        <label for="create_description">Description</label>
-                        <input id="create_description" required placeholder="Updated lecture room" />
-
-                        <div class="form-actions">
-                            <button class="btn btn-primary" type="submit">Create</button>
+                <section class="filter-card">
+                    <form id="searchRoomForm" class="filter-grid">
+                        <div>
+                            <label for="booking_date">Date</label>
+                            <input id="booking_date" type="date" />
+                        </div>
+                        <div>
+                            <label for="search_capacity">Min Capacity</label>
+                            <input id="search_capacity" type="number" min="1" placeholder="Any" />
+                        </div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                            <button id="resetSearchBtn" class="btn btn-soft" type="button">All</button>
                         </div>
                     </form>
-                </div>
+                </section>
 
-                <div class="panel">
-                    <h2>Search by Capacity</h2>
-                    <form id="searchRoomForm">
-                        <label for="search_capacity">Minimum capacity</label>
-                        <input id="search_capacity" type="number" min="1" required placeholder="40" />
-                        <div class="form-actions">
-                            <button class="btn btn-teal" type="submit">Search</button>
-                            <button id="resetSearchBtn" class="btn" type="button">All Rooms</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="panel">
-                    <h2>Update Room</h2>
-                    <form id="updateRoomForm">
-                        <label for="update_room_id">Room ID</label>
-                        <input id="update_room_id" type="number" min="1" required placeholder="3" />
-
-                        <label for="update_room_number">Room number</label>
-                        <input id="update_room_number" required placeholder="B401" />
-
-                        <label for="update_capacity">Capacity</label>
-                        <input id="update_capacity" type="number" min="1" required placeholder="45" />
-
-                        <label for="update_building_id">Building ID</label>
-                        <input id="update_building_id" required placeholder="1" />
-
-                        <label for="update_description">Description</label>
-                        <input id="update_description" required placeholder="Updated lecture room" />
-
-                        <div class="form-actions">
-                            <button class="btn btn-primary" type="submit">Update</button>
-                        </div>
-                    </form>
-                </div>
-            </aside>
-
-            <section class="panel">
-                <h2 id="roomsTitle">Rooms</h2>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Room number</th>
-                                <th>Capacity</th>
-                                <th>Building ID</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="roomsBody">
-                            <tr><td class="empty" colspan="6">Load rooms to begin.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <section class="layout">
+                    <div id="roomsGrid" class="rooms-grid"></div>
+                </section>
             </section>
+        </main>
+    </div>
+
+    <div id="bookingModal" class="modal-backdrop">
+        <section class="modal-card">
+            <button id="closeModalBtn" class="btn btn-soft" type="button">← Back to Rooms</button>
+            <div class="modal-head">
+                <div class="modal-icon">▥</div>
+                <div>
+                    <h2 id="modalRoomTitle">Room</h2>
+                    <p id="modalRoomMeta" class="subtle">Select start and end times</p>
+                </div>
+            </div>
+            <form id="createBookingForm" class="form-grid">
+                <input id="create_user_id" type="hidden" />
+                <input id="create_room_id" type="hidden" />
+                <div><label>Date</label><input id="booking_modal_date" type="date" required /></div>
+                <div><label>Select start time</label><div id="startTimes" class="time-grid"></div></div>
+                <div><label>Select end time</label><div id="endTimes" class="time-grid"></div></div>
+                <div><label for="create_purpose">Booking Purpose</label><input id="create_purpose" required placeholder="e.g. Team meeting, study session..." /></div>
+                <input id="create_start_time" type="hidden" />
+                <input id="create_end_time" type="hidden" />
+                <button class="btn btn-primary" type="submit">Confirm Booking</button>
+            </form>
         </section>
-    </main>
+    </div>
 
     <script>
         const token = localStorage.getItem('sc_token');
         const message = document.getElementById('message');
-        const roomsBody = document.getElementById('roomsBody');
-        const roomsTitle = document.getElementById('roomsTitle');
+        const roomsGrid = document.getElementById('roomsGrid');
+        const modal = document.getElementById('bookingModal');
+        const times = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+        let selectedStart = '';
+        let selectedEnd = '';
 
-        function showMessage(text, type) {
-            message.textContent = text;
-            message.className = 'message ' + type;
+        function decodeToken(){if(!token)return null;try{const base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(base64))))}catch(e){return null}}
+        function showMessage(text, type) { message.textContent = text; message.className = 'alert ' + type; }
+        function clearMessage() { message.className = 'alert'; message.textContent = ''; }
+        function authHeaders() { return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('sc_token') }; }
+        function setLoading(button, loading, text) {
+            if (!button) return;
+            if (loading) { button.dataset.originalText = button.textContent; button.textContent = text || 'Loading...'; button.disabled = true; return; }
+            button.textContent = button.dataset.originalText || button.textContent; button.disabled = false;
         }
-
-        function clearMessage() {
-            message.className = 'message';
-            message.textContent = '';
-        }
-
-        function authHeaders() {
-            return {
-                'Content-Type': 'application/json',
-                Authorization: 'Bearer ' + localStorage.getItem('sc_token')
-            };
-        }
-
         async function parseResponse(res) {
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                throw new Error(data.error || data.message || 'Request failed');
-            }
+            if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
             return data;
         }
-
-        function roomValue(room, snake, camel) {
-            return room[snake] ?? room[camel] ?? '';
-        }
-
-        function getRooms(data) {
-            return data.rooms || data.Rooms || [];
-        }
-
-        function renderRooms(data, title) {
+        function roomValue(room, snake, camel) { return room[snake] ?? room[camel] ?? ''; }
+        function getRooms(data) { return data.rooms || data.Rooms || []; }
+        function renderRooms(data) {
             const rooms = getRooms(data);
-            roomsTitle.textContent = title || 'Rooms';
-            roomsBody.innerHTML = '';
-
-            if (!rooms.length) {
-                roomsBody.innerHTML = '<tr><td class="empty" colspan="6">No rooms found.</td></tr>';
-                return;
-            }
-
+            roomsGrid.innerHTML = '';
+            if (!rooms.length) { roomsGrid.innerHTML = '<div class="empty">No rooms found.</div>'; return; }
             rooms.forEach((room) => {
-                const row = document.createElement('tr');
-                const description = roomValue(room, 'room_type', 'roomType') || roomValue(room, 'description', 'description');
-                row.innerHTML = `
-                    <td><span class="room-id">${roomValue(room, 'id', 'id')}</span></td>
-                    <td><strong>${roomValue(room, 'room_number', 'roomNumber')}</strong></td>
-                    <td>${roomValue(room, 'capacity', 'capacity')}</td>
-                    <td>${roomValue(room, 'building_id', 'buildingId')}</td>
-                    <td>${description}</td>
-                    <td>${roomValue(room, 'status', 'status') || 'Available'}</td>
+                const id = roomValue(room, 'id', 'id');
+                const number = roomValue(room, 'room_number', 'roomNumber') || 'Room ' + id;
+                const capacity = roomValue(room, 'capacity', 'capacity') || 0;
+                const building = roomValue(room, 'building_id', 'buildingId') || '-';
+                const description = roomValue(room, 'room_type', 'roomType') || roomValue(room, 'description', 'description') || 'Campus room';
+                const card = document.createElement('article');
+                card.className = 'room-card';
+                card.innerHTML = `
+                    <div class="room-top">
+                        <div><h3>${number}</h3><p>${description}</p></div>
+                        <span class="slots">Available</span>
+                    </div>
+                    <div class="room-meta"><span>♙ ${capacity}</span><span>Building ${building}</span><span>ID ${id}</span></div>
+                    <button class="btn btn-primary" type="button" data-room-id="${id}">Book Now</button>
                 `;
-                roomsBody.appendChild(row);
+                card.querySelector('button').addEventListener('click', () => {
+                    openBookingModal({ id, number, capacity, building });
+                });
+                roomsGrid.appendChild(card);
             });
         }
-
-        async function loadRooms(title) {
+        async function loadRooms(button) {
             clearMessage();
-            const res = await fetch('/rooms', { headers: authHeaders() });
-            const data = await parseResponse(res);
-            renderRooms(data, title || 'Rooms');
-            return data;
+            setLoading(button, true, 'Loading...');
+            try {
+                const res = await fetch('/rooms', { headers: authHeaders() });
+                renderRooms(await parseResponse(res));
+            } finally { setLoading(button, false); }
         }
+        function toISOStringFromDateTime(date, time) { return new Date(date + 'T' + time + ':00').toISOString(); }
+        function renderTimeButtons(containerID, selected, onSelect) {
+            const container = document.getElementById(containerID);
+            container.innerHTML = '';
+            times.forEach((time) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'time-chip' + (selected === time ? ' selected' : '');
+                btn.textContent = time;
+                btn.addEventListener('click', () => onSelect(time));
+                container.appendChild(btn);
+            });
+        }
+        function refreshTimes() {
+            renderTimeButtons('startTimes', selectedStart, (time) => { selectedStart = time; document.getElementById('create_start_time').value = time; refreshTimes(); });
+            renderTimeButtons('endTimes', selectedEnd, (time) => { selectedEnd = time; document.getElementById('create_end_time').value = time; refreshTimes(); });
+        }
+        function openBookingModal(room) {
+            const user = decodeToken();
+            document.getElementById('create_user_id').value = user ? user.user_id : '';
+            document.getElementById('create_room_id').value = room.id;
+            document.getElementById('modalRoomTitle').textContent = room.number;
+            document.getElementById('modalRoomMeta').textContent = room.capacity + ' people · Building ' + room.building;
+            document.getElementById('booking_modal_date').value = document.getElementById('booking_date').value || new Date().toISOString().slice(0, 10);
+            selectedStart = '';
+            selectedEnd = '';
+            document.getElementById('create_purpose').value = '';
+            refreshTimes();
+            modal.classList.add('open');
+        }
+        function closeBookingModal() { modal.classList.remove('open'); }
 
         if (!token) {
             showMessage('Please login first. Redirecting to login...', 'info');
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 1200);
+            setTimeout(() => { window.location.href = '/login'; }, 1200);
         } else {
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('booking_date').value = today;
             loadRooms().catch((error) => showMessage(error.message, 'error'));
         }
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('sc_token');
-            window.location.href = '/login';
-        });
-
-        document.getElementById('loadBtn').addEventListener('click', () => {
-            loadRooms().catch((error) => showMessage(error.message, 'error'));
-        });
-
-        document.getElementById('resetSearchBtn').addEventListener('click', () => {
+        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('sc_token'); localStorage.removeItem('sc_user'); window.location.href = '/login'; });
+        const user = decodeToken();
+        if(user && String(user.role||'').toUpperCase()==='ADMIN'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex')}
+        document.getElementById('closeModalBtn').addEventListener('click', closeBookingModal);
+        modal.addEventListener('click', (event) => { if (event.target === modal) closeBookingModal(); });
+        document.getElementById('resetSearchBtn').addEventListener('click', (event) => {
             document.getElementById('search_capacity').value = '';
-            loadRooms().catch((error) => showMessage(error.message, 'error'));
+            loadRooms(event.currentTarget).catch((error) => showMessage(error.message, 'error'));
         });
-
-        document.getElementById('createRoomForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            clearMessage();
-
-            const body = {
-                room_number: document.getElementById('create_room_number').value.trim(),
-                capacity: Number(document.getElementById('create_capacity').value),
-                building_id: document.getElementById('create_building_id').value.trim(),
-                description: document.getElementById('create_description').value.trim()
-            };
-
-            try {
-                const res = await fetch('/rooms', {
-                    method: 'POST',
-                    headers: authHeaders(),
-                    body: JSON.stringify(body)
-                });
-                await parseResponse(res);
-                showMessage('Room created successfully.', 'success');
-                event.target.reset();
-                await loadRooms();
-            } catch (error) {
-                showMessage(error.message, 'error');
-            }
-        });
-
         document.getElementById('searchRoomForm').addEventListener('submit', async (event) => {
             event.preventDefault();
             clearMessage();
+            const button = event.submitter;
             const capacity = document.getElementById('search_capacity').value;
-
+            if (!capacity) { loadRooms(button).catch((error) => showMessage(error.message, 'error')); return; }
+            setLoading(button, true, 'Searching...');
             try {
-                const res = await fetch('/rooms/search?capacity=' + encodeURIComponent(capacity), {
-                    headers: authHeaders()
-                });
-                const data = await parseResponse(res);
-                renderRooms(data, 'Rooms with capacity ' + capacity + '+');
-                showMessage('Search completed.', 'success');
-            } catch (error) {
-                showMessage(error.message, 'error');
-            }
+                const res = await fetch('/rooms/search?capacity=' + encodeURIComponent(capacity), { headers: authHeaders() });
+                renderRooms(await parseResponse(res));
+                showMessage('Rooms filtered by capacity.', 'success');
+            } catch (error) { showMessage(error.message, 'error'); }
+            finally { setLoading(button, false); }
         });
-
-        document.getElementById('updateRoomForm').addEventListener('submit', async (event) => {
+        document.getElementById('createBookingForm').addEventListener('submit', async (event) => {
             event.preventDefault();
             clearMessage();
-            const id = document.getElementById('update_room_id').value;
-            const body = {
-                room_number: document.getElementById('update_room_number').value.trim(),
-                capacity: Number(document.getElementById('update_capacity').value),
-                building_id: document.getElementById('update_building_id').value.trim(),
-                description: document.getElementById('update_description').value.trim()
-            };
-
-            try {
-                const res = await fetch('/rooms/' + encodeURIComponent(id), {
-                    method: 'PUT',
-                    headers: authHeaders(),
-                    body: JSON.stringify(body)
-                });
-                await parseResponse(res);
-                showMessage('Room updated successfully.', 'success');
-                event.target.reset();
-                await loadRooms();
-            } catch (error) {
-                showMessage(error.message, 'error');
+            const button = event.submitter;
+            setLoading(button, true, 'Booking...');
+            if (!selectedStart || !selectedEnd) {
+                showMessage('Please select start and end times.', 'error');
+                setLoading(button, false);
+                return;
             }
+            const body = {
+                user_id: Number(document.getElementById('create_user_id').value),
+                room_id: Number(document.getElementById('create_room_id').value),
+                start_time: toISOStringFromDateTime(document.getElementById('booking_modal_date').value, selectedStart),
+                end_time: toISOStringFromDateTime(document.getElementById('booking_modal_date').value, selectedEnd),
+                purpose: document.getElementById('create_purpose').value.trim()
+            };
+            try {
+                const res = await fetch('/bookings', { method: 'POST', headers: authHeaders(), body: JSON.stringify(body) });
+                await parseResponse(res);
+                showMessage('Booking created successfully.', 'success');
+                closeBookingModal();
+                event.target.reset();
+            } catch (error) { showMessage(error.message, 'error'); }
+            finally { setLoading(button, false); }
         });
     </script>
 </body>

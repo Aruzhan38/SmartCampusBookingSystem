@@ -3,341 +3,138 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bookings - Smart Campus Booking</title>
+    <title>My Bookings - Smart Campus</title>
     <style>
         :root {
-            --bg: #f5f7fb;
-            --surface: #ffffff;
-            --ink: #102033;
-            --muted: #667085;
-            --line: #dbe3ef;
-            --brand: #2563eb;
-            --brand-dark: #1e40af;
-            --indigo: #4f46e5;
-            --teal: #0f766e;
+            --bg: #eef5ff;
+            --sidebar: #fbfdff;
+            --card: #fbfcff;
+            --text: #2d3748;
+            --muted: #8da0bd;
+            --line: #dde8f6;
+            --blue: #5b9dec;
+            --teal: #65c8a7;
+            --danger: #ef4444;
+            --success: #15803d;
             --amber: #b45309;
-            --danger: #b42318;
-            --success: #087443;
-            --shadow: 0 14px 34px rgba(31, 41, 55, 0.1);
+            --gray: #475467;
+            --shadow: 0 16px 40px rgba(61, 83, 120, 0.08);
+            --radius: 22px;
         }
         * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: var(--bg);
-            color: var(--ink);
-        }
-        .nav {
-            min-height: 72px;
-            padding: 0 5vw;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(219, 227, 239, 0.86);
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(14px);
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; }
-        .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            color: white;
-            background: linear-gradient(135deg, var(--brand), var(--indigo));
-        }
-        .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-        .btn {
-            min-height: 40px;
-            padding: 10px 14px;
-            border: 0;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 850;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: var(--ink);
-            background: #eef2ff;
-        }
-        .btn-primary { background: linear-gradient(135deg, var(--brand), var(--indigo)); color: white; }
-        .btn-teal { background: #ccfbf1; color: #115e59; }
-        .btn-amber { background: #ffedd5; color: var(--amber); }
-        .btn-danger { background: #fee4e2; color: var(--danger); }
-        .page { padding: 34px 5vw 56px; }
-        .page-head {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            align-items: flex-end;
-            margin-bottom: 24px;
-        }
-        h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; }
-        .subtle { color: var(--muted); line-height: 1.55; margin: 10px 0 0; }
-        .message {
-            display: none;
-            margin: 0 0 18px;
-            padding: 13px 15px;
-            border-radius: 12px;
-            font-weight: 800;
-            line-height: 1.45;
-        }
-        .message.error { display: block; color: var(--danger); background: #fef3f2; border: 1px solid #fecdca; }
-        .message.success { display: block; color: var(--success); background: #ecfdf3; border: 1px solid #abefc6; }
-        .message.info { display: block; color: var(--brand-dark); background: #eff6ff; border: 1px solid #bfdbfe; }
-        .grid {
-            display: grid;
-            grid-template-columns: minmax(280px, 370px) minmax(0, 1fr);
-            gap: 22px;
-            align-items: start;
-        }
-        .panel {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-        }
-        .panel + .panel { margin-top: 18px; }
-        .panel h2 { margin: 0 0 14px; font-size: 1.08rem; }
-        label { display: block; margin: 12px 0 7px; color: #344054; font-weight: 850; }
-        input, select {
-            width: 100%;
-            min-height: 42px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 0 12px;
-            font: inherit;
-            background: #fbfdff;
-            color: var(--ink);
-        }
-        input:focus, select:focus {
-            outline: 3px solid rgba(37, 99, 235, 0.14);
-            border-color: var(--brand);
-        }
-        .form-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
-        .table-wrap {
-            overflow-x: auto;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 860px;
-            background: white;
-        }
-        th, td {
-            padding: 13px 14px;
-            text-align: left;
-            border-bottom: 1px solid #e7edf6;
-            vertical-align: top;
-        }
-        th {
-            background: #f8fafc;
-            color: #344054;
-            font-size: 0.82rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-        tr:last-child td { border-bottom: 0; }
-        .booking-id {
-            display: inline-flex;
-            min-width: 34px;
-            height: 28px;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            background: #eaf1ff;
-            color: var(--brand-dark);
-            font-weight: 900;
-        }
-        .status {
-            display: inline-flex;
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 0.78rem;
-            font-weight: 900;
-            background: #eef2ff;
-            color: var(--brand-dark);
-        }
-        .status.cancelled { background: #fee4e2; color: var(--danger); }
-        .status.confirmed { background: #ecfdf3; color: var(--success); }
-        .status.rejected { background: #fff7ed; color: var(--amber); }
-        .empty {
-            padding: 28px;
-            color: var(--muted);
-            text-align: center;
-        }
-        @media (max-width: 1020px) {
-            .grid { grid-template-columns: 1fr; }
-            .page-head { align-items: flex-start; flex-direction: column; }
-            .nav { align-items: flex-start; flex-direction: column; gap: 14px; padding-top: 16px; padding-bottom: 16px; }
-        }
-        @media (max-width: 560px) {
-            .nav-actions, .btn { width: 100%; }
-            .form-actions .btn { flex: 1 1 100%; }
+        body { margin: 0; min-height: 100vh; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+        .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+        .sidebar { position: sticky; top: 0; height: 100vh; padding: 28px 20px; background: var(--sidebar); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 34px; }
+        .brand { display: flex; align-items: center; gap: 14px; font-size: 1.25rem; font-weight: 900; text-decoration: none; color: var(--text); }
+        .brand-icon { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; color: white; background: linear-gradient(135deg, var(--blue), var(--teal)); font-weight: 900; }
+        .nav { display: grid; gap: 10px; }
+        .nav a, .logout { min-height: 52px; padding: 0 16px; border: 0; border-radius: 16px; display: flex; align-items: center; gap: 14px; background: transparent; color: #617492; font: inherit; font-weight: 800; text-decoration: none; cursor: pointer; transition: 0.18s ease; }
+        .nav a:hover, .logout:hover { background: #edf5ff; color: var(--text); }
+        .nav a.active { background: #e4effc; color: var(--text); outline: 2px solid #111827; }
+        .logout { margin-top: auto; color: var(--danger); }
+        .admin-only { display: none; }
+        .main { min-width: 0; }
+        .topbar { height: 72px; border-bottom: 1px solid var(--line); background: rgba(251, 253, 255, 0.84); display: flex; justify-content: flex-end; align-items: center; padding: 0 28px; }
+        .bell { font-size: 1.35rem; color: #617492; }
+        .content { width: min(980px, calc(100% - 64px)); margin: 0 auto; padding: 36px 0 64px; }
+        .page-head { margin-bottom: 24px; }
+        h1 { margin: 0; font-size: clamp(2rem, 3vw, 2.4rem); }
+        .subtle { color: var(--muted); margin: 8px 0 0; font-size: 1.05rem; font-weight: 650; }
+        .alert { display: none; margin: 0 0 18px; padding: 14px 16px; border-radius: 16px; font-weight: 800; }
+        .alert.error { display: block; color: #b42318; background: #fef3f2; border: 1px solid #fecdca; }
+        .alert.success { display: block; color: var(--success); background: #ecfdf3; border: 1px solid #abefc6; }
+        .alert.info { display: block; color: #1d4ed8; background: #eff6ff; border: 1px solid #bfdbfe; }
+        .filters, .booking-card { background: var(--card); border: 1px solid #edf3fb; border-radius: var(--radius); box-shadow: var(--shadow); }
+        .filters { padding: 14px; margin-bottom: 22px; display: flex; gap: 10px; flex-wrap: wrap; }
+        label { display: block; color: #617492; font-weight: 850; margin-bottom: 8px; }
+        input { width: 100%; min-height: 50px; border: 1px solid #d8e5f5; border-radius: 16px; padding: 0 16px; background: white; color: var(--text); font: inherit; }
+        input:focus { outline: 0; border-color: #8bc1ff; box-shadow: 0 0 0 4px rgba(91, 157, 236, 0.16); }
+        .btn { min-height: 50px; border: 0; border-radius: 16px; padding: 0 20px; font: inherit; font-weight: 900; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+        .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+        .btn-primary { color: white; background: linear-gradient(135deg, var(--blue), var(--teal)); }
+        .btn-danger { color: var(--danger); background: white; border: 1px solid #ff9f9f; }
+        .btn:disabled { opacity: 0.65; cursor: wait; transform: none; }
+        .bookings-list { display: grid; gap: 16px; }
+        .booking-card { padding: 22px; display: grid; grid-template-columns: 58px 1fr auto; gap: 18px; align-items: center; }
+        .room-icon { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: #e6f2ff; color: var(--blue); font-size: 1.35rem; font-weight: 900; }
+        .booking-title { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+        .booking-title strong { font-size: 1.08rem; }
+        .status { display: inline-flex; padding: 5px 11px; border-radius: 999px; font-size: 0.85rem; font-weight: 900; text-transform: lowercase; }
+        .status.confirmed { background: #dcfce7; color: var(--success); }
+        .status.cancelled { background: #fee4e2; color: #b42318; }
+        .status.pending { background: #fffaeb; color: var(--amber); }
+        .status.rejected { background: #f2f4f7; color: var(--gray); }
+        .booking-time { color: var(--muted); font-weight: 750; }
+        .purpose { color: #617492; margin-top: 4px; }
+        .empty { min-height: 240px; display: grid; place-items: center; color: var(--muted); font-weight: 800; background: var(--card); border-radius: var(--radius); border: 1px dashed #cbd9ee; }
+        @media (max-width: 820px) {
+            .app { grid-template-columns: 1fr; }
+            .sidebar { position: static; height: auto; }
+            .content { width: min(100% - 28px, 980px); }
+            .booking-card { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <header class="nav">
-        <div class="brand"><div class="brand-mark">SC</div><span>Bookings Dashboard</span></div>
-        <nav class="nav-actions">
-            <a class="btn" href="/">Home</a>
-            <a class="btn" href="/rooms-ui">Rooms</a>
-            <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
-        </nav>
-    </header>
+    <div class="app">
+        <aside class="sidebar">
+            <a class="brand" href="/"><span class="brand-icon">SC</span><span>Smart Campus</span></a>
+            <nav class="nav">
+                <a href="/">▦ Dashboard</a>
+                <a href="/rooms-ui">▥ Rooms</a>
+                <a class="active" href="/bookings-ui">▣ My Bookings</a>
+                <a href="/profile-ui">♙ Profile</a>
+                <a class="admin-only" href="/admin-ui">◇ Admin</a>
+            </nav>
+            <button id="logoutBtn" class="logout" type="button">↪ Logout</button>
+        </aside>
 
-    <main class="page">
-        <div class="page-head">
-            <div>
-                <h1>My Bookings</h1>
-                <p class="subtle">Create reservations, check user bookings, cancel slots, and update booking status.</p>
-            </div>
-        </div>
+        <main class="main">
+            <div class="topbar"><span class="bell">♢</span></div>
+            <section class="content">
+                <header class="page-head">
+                    <h1>My Bookings</h1>
+                <p id="bookingsMeta" class="subtle">Your bookings load automatically from your account.</p>
+                </header>
+                <div id="message" class="alert"></div>
 
-        <div id="message" class="message"></div>
+                <section class="filters">
+                    <button class="btn btn-primary" type="button" data-filter="all">All</button>
+                    <button class="btn" type="button" data-filter="active">Active</button>
+                    <button class="btn" type="button" data-filter="cancelled">Cancelled</button>
+                </section>
 
-        <section class="grid">
-            <aside>
-                <div class="panel">
-                    <h2>Create Booking</h2>
-                    <form id="createBookingForm">
-                        <label for="create_user_id">User ID</label>
-                        <input id="create_user_id" type="number" min="1" required placeholder="1" />
-
-                        <label for="create_room_id">Room ID</label>
-                        <input id="create_room_id" type="number" min="1" required placeholder="3" />
-
-                        <label for="create_start_time">Start time</label>
-                        <input id="create_start_time" type="datetime-local" required />
-
-                        <label for="create_end_time">End time</label>
-                        <input id="create_end_time" type="datetime-local" required />
-
-                        <label for="create_purpose">Purpose</label>
-                        <input id="create_purpose" required placeholder="Group study" />
-
-                        <div class="form-actions">
-                            <button class="btn btn-primary" type="submit">Create Booking</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="panel">
-                    <h2>List My Bookings</h2>
-                    <form id="listBookingsForm">
-                        <label for="list_user_id">User ID</label>
-                        <input id="list_user_id" type="number" min="1" required placeholder="1" />
-                        <div class="form-actions">
-                            <button class="btn btn-teal" type="submit">Load</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="panel">
-                    <h2>Cancel Booking</h2>
-                    <form id="cancelBookingForm">
-                        <label for="cancel_booking_id">Booking ID</label>
-                        <input id="cancel_booking_id" type="number" min="1" required placeholder="8" />
-
-                        <label for="cancel_user_id">User ID</label>
-                        <input id="cancel_user_id" type="number" min="1" required placeholder="1" />
-
-                        <div class="form-actions">
-                            <button class="btn btn-danger" type="submit">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="panel">
-                    <h2>Update Status</h2>
-                    <form id="statusBookingForm">
-                        <label for="status_booking_id">Booking ID</label>
-                        <input id="status_booking_id" type="number" min="1" required placeholder="8" />
-
-                        <label for="booking_status">Status</label>
-                        <select id="booking_status" required>
-                            <option value="PENDING" disabled>Pending</option>
-                            <option value="CONFIRMED" selected>Confirmed</option>
-                            <option value="CANCELLED">Cancelled</option>
-                            <option value="REJECTED">Rejected</option>
-                        </select>
-
-                        <div class="form-actions">
-                            <button class="btn btn-amber" type="submit">Update Status</button>
-                        </div>
-                    </form>
-                </div>
-            </aside>
-
-            <section class="panel">
-                <h2 id="bookingsTitle">Bookings</h2>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Room ID</th>
-                                <th>User ID</th>
-                                <th>Start time</th>
-                                <th>End time</th>
-                                <th>Purpose</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bookingsBody">
-                            <tr><td class="empty" colspan="7">Load user bookings to begin.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <section id="bookingsBody" class="bookings-list">
+                    <div class="empty">No bookings loaded yet.</div>
+                </section>
             </section>
-        </section>
-    </main>
+        </main>
+    </div>
 
     <script>
         const token = localStorage.getItem('sc_token');
         const message = document.getElementById('message');
         const bookingsBody = document.getElementById('bookingsBody');
-        const bookingsTitle = document.getElementById('bookingsTitle');
+        const bookingsMeta = document.getElementById('bookingsMeta');
+        let currentUserID = '';
+        let allBookings = [];
+        let currentFilter = 'all';
 
-        function showMessage(text, type) {
-            message.textContent = text;
-            message.className = 'message ' + type;
+        function decodeToken(){if(!token)return null;try{const base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(base64))))}catch(e){return null}}
+        function showMessage(text, type) { message.textContent = text; message.className = 'alert ' + type; }
+        function clearMessage() { message.className = 'alert'; message.textContent = ''; }
+        function authHeaders() { return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('sc_token') }; }
+        function setLoading(button, loading, text) {
+            if (!button) return;
+            if (loading) { button.dataset.originalText = button.textContent; button.textContent = text || 'Loading...'; button.disabled = true; return; }
+            button.textContent = button.dataset.originalText || button.textContent; button.disabled = false;
         }
-
-        function clearMessage() {
-            message.className = 'message';
-            message.textContent = '';
-        }
-
-        function authHeaders() {
-            return {
-                'Content-Type': 'application/json',
-                Authorization: 'Bearer ' + localStorage.getItem('sc_token')
-            };
-        }
-
         async function parseResponse(res) {
             const data = await res.json().catch(() => ({}));
-            if (!res.ok) {
-                throw new Error(data.error || data.message || 'Request failed');
-            }
+            if (!res.ok) throw new Error(data.error || data.message || 'Request failed');
             return data;
         }
-
-        function bookingValue(booking, snake, camel) {
-            return booking[snake] ?? booking[camel] ?? '';
-        }
-
+        function bookingValue(booking, snake, camel) { return booking[snake] ?? booking[camel] ?? ''; }
         function getBookings(data) {
             if (data.bookings) return data.bookings;
             if (data.Bookings) return data.Bookings;
@@ -345,149 +142,79 @@
             if (data.Booking) return [data.Booking];
             return [];
         }
-
         function formatDate(value) {
             if (!value) return '';
             const date = new Date(value);
             if (Number.isNaN(date.getTime())) return value;
             return date.toLocaleString();
         }
-
-        function renderBookings(data, title) {
-            const bookings = getBookings(data);
-            bookingsTitle.textContent = title || 'Bookings';
+        function renderBookings(data) {
+            allBookings = getBookings(data);
+            applyFilter();
+        }
+        function applyFilter() {
+            let bookings = allBookings;
+            if (currentFilter === 'active') bookings = allBookings.filter((booking) => String(bookingValue(booking, 'status', 'status')).toUpperCase() !== 'CANCELLED');
+            if (currentFilter === 'cancelled') bookings = allBookings.filter((booking) => String(bookingValue(booking, 'status', 'status')).toUpperCase() === 'CANCELLED');
+            bookingsMeta.textContent = bookings.length + ' booking' + (bookings.length === 1 ? '' : 's');
             bookingsBody.innerHTML = '';
-
-            if (!bookings.length) {
-                bookingsBody.innerHTML = '<tr><td class="empty" colspan="7">No bookings found.</td></tr>';
-                return;
-            }
-
+            if (!bookings.length) { bookingsBody.innerHTML = '<div class="empty">No bookings found.</div>'; return; }
             bookings.forEach((booking) => {
-                const status = String(bookingValue(booking, 'status', 'status') || '').toLowerCase();
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><span class="booking-id">${bookingValue(booking, 'id', 'id')}</span></td>
-                    <td>${bookingValue(booking, 'room_id', 'roomId')}</td>
-                    <td>${bookingValue(booking, 'user_id', 'userId')}</td>
-                    <td>${formatDate(bookingValue(booking, 'start_time', 'startTime'))}</td>
-                    <td>${formatDate(bookingValue(booking, 'end_time', 'endTime'))}</td>
-                    <td>${bookingValue(booking, 'purpose', 'purpose')}</td>
-                    <td><span class="status ${status}">${bookingValue(booking, 'status', 'status')}</span></td>
+                const id = bookingValue(booking, 'id', 'id');
+                const statusRaw = String(bookingValue(booking, 'status', 'status') || 'PENDING');
+                const status = statusRaw.toLowerCase();
+                const roomID = bookingValue(booking, 'room_id', 'roomId');
+                const card = document.createElement('article');
+                card.className = 'booking-card';
+                card.innerHTML = `
+                    <div class="room-icon">▥</div>
+                    <div>
+                        <div class="booking-title"><strong>Room ${roomID}</strong><span class="status ${status}">${statusRaw}</span></div>
+                        <div class="booking-time">${formatDate(bookingValue(booking, 'start_time', 'startTime'))} - ${formatDate(bookingValue(booking, 'end_time', 'endTime'))}</div>
+                        <div class="purpose">${bookingValue(booking, 'purpose', 'purpose')}</div>
+                    </div>
+                    <button class="btn btn-danger" type="button" data-booking-id="${id}">Cancel</button>
                 `;
-                bookingsBody.appendChild(row);
+                card.querySelector('button').addEventListener('click', (event) => cancelBooking(id, event.currentTarget));
+                bookingsBody.appendChild(card);
             });
         }
-
-        function toISOStringFromLocal(value) {
-            return new Date(value).toISOString();
-        }
-
-        async function loadUserBookings(userID) {
-            const res = await fetch('/bookings/my?user_id=' + encodeURIComponent(userID), {
-                headers: authHeaders()
-            });
-            const data = await parseResponse(res);
-            renderBookings(data, 'Bookings for user ' + userID);
-            return data;
-        }
-
-        function rememberUserID(userID) {
-            document.getElementById('list_user_id').value = userID;
-            document.getElementById('cancel_user_id').value = userID;
-        }
-
-        if (!token) {
-            showMessage('Please login first. Redirecting to login...', 'info');
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 1200);
-        }
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('sc_token');
-            window.location.href = '/login';
-        });
-
-        document.getElementById('createBookingForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            clearMessage();
-
-            const userID = document.getElementById('create_user_id').value;
-            const body = {
-                user_id: Number(userID),
-                room_id: Number(document.getElementById('create_room_id').value),
-                start_time: toISOStringFromLocal(document.getElementById('create_start_time').value),
-                end_time: toISOStringFromLocal(document.getElementById('create_end_time').value),
-                purpose: document.getElementById('create_purpose').value.trim()
-            };
-
+        async function loadUserBookings(userID, button) {
+            currentUserID = userID;
+            setLoading(button, true, 'Loading...');
             try {
-                const res = await fetch('/bookings', {
-                    method: 'POST',
-                    headers: authHeaders(),
-                    body: JSON.stringify(body)
-                });
-                const data = await parseResponse(res);
-                showMessage('Booking created successfully.', 'success');
-                rememberUserID(userID);
-                renderBookings(data, 'Latest booking');
-            } catch (error) {
-                const type = error.message === 'room is already booked for this time' ? 'error' : 'error';
-                showMessage(error.message, type);
-            }
-        });
-
-        document.getElementById('listBookingsForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
+                const res = await fetch('/bookings/my?user_id=' + encodeURIComponent(userID), { headers: authHeaders() });
+                renderBookings(await parseResponse(res));
+            } finally { setLoading(button, false); }
+        }
+        async function cancelBooking(bookingID, button) {
+            if (!currentUserID) { showMessage('Load your bookings first.', 'error'); return; }
             clearMessage();
-            const userID = document.getElementById('list_user_id').value;
+            setLoading(button, true, 'Cancelling...');
             try {
-                await loadUserBookings(userID);
-                rememberUserID(userID);
-                showMessage('Bookings loaded.', 'success');
-            } catch (error) {
-                showMessage(error.message, 'error');
-            }
-        });
-
-        document.getElementById('cancelBookingForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            clearMessage();
-            const bookingID = document.getElementById('cancel_booking_id').value;
-            const userID = document.getElementById('cancel_user_id').value;
-
-            try {
-                const res = await fetch('/bookings/' + encodeURIComponent(bookingID) + '?user_id=' + encodeURIComponent(userID), {
-                    method: 'DELETE',
-                    headers: authHeaders()
-                });
-                const data = await parseResponse(res);
+                const res = await fetch('/bookings/' + encodeURIComponent(bookingID) + '?user_id=' + encodeURIComponent(currentUserID), { method: 'DELETE', headers: authHeaders() });
+                await parseResponse(res);
                 showMessage('Booking cancelled successfully.', 'success');
-                renderBookings(data, 'Cancelled booking');
-            } catch (error) {
-                showMessage(error.message, 'error');
-            }
-        });
+                await loadUserBookings(currentUserID);
+            } catch (error) { showMessage(error.message, 'error'); }
+            finally { setLoading(button, false); }
+        }
 
-        document.getElementById('statusBookingForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
-            clearMessage();
-            const bookingID = document.getElementById('status_booking_id').value;
-            const status = document.getElementById('booking_status').value;
-
-            try {
-                const res = await fetch('/bookings/' + encodeURIComponent(bookingID) + '/status', {
-                    method: 'PATCH',
-                    headers: authHeaders(),
-                    body: JSON.stringify({ status })
-                });
-                const data = await parseResponse(res);
-                showMessage('Booking status updated successfully.', 'success');
-                renderBookings(data, 'Updated booking');
-            } catch (error) {
-                showMessage(error.message, 'error');
-            }
+        const user = decodeToken();
+        if (!token || !user) {
+            showMessage('Please login first. Redirecting to login...', 'info');
+            setTimeout(() => { window.location.href = '/login'; }, 1200);
+        } else {
+            currentUserID = user.user_id;
+            if(String(user.role||'').toUpperCase()==='ADMIN'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex')}
+            loadUserBookings(currentUserID).catch((error) => showMessage(error.message, 'error'));
+        }
+        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('sc_token'); localStorage.removeItem('sc_user'); window.location.href = '/login'; });
+        document.querySelectorAll('[data-filter]').forEach((button) => {
+            button.addEventListener('click', () => {
+                currentFilter = button.dataset.filter;
+                applyFilter();
+            });
         });
     </script>
 </body>

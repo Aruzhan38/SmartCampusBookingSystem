@@ -50,6 +50,8 @@ func main() {
 	r.GET("/register", webHandler.RegisterPage)
 	r.GET("/rooms-ui", webHandler.RoomsPage)
 	r.GET("/bookings-ui", webHandler.BookingsPage)
+	r.GET("/admin-ui", webHandler.AdminPage)
+	r.GET("/profile-ui", webHandler.ProfilePage)
 
 	r.POST("/api/register", userHandler.Register)
 	r.POST("/api/login", userHandler.Login)

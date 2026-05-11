@@ -3,207 +3,54 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register - Smart Campus Booking</title>
+    <title>Register - Smart Campus</title>
     <style>
-        :root {
-            --bg: #f5f7fb;
-            --surface: #ffffff;
-            --ink: #102033;
-            --muted: #667085;
-            --line: #dbe3ef;
-            --brand: #2563eb;
-            --indigo: #4f46e5;
-            --teal: #0f766e;
-            --danger: #b42318;
-            --success: #087443;
-            --shadow: 0 18px 45px rgba(31, 41, 55, 0.12);
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top right, #ccfbf1 0, transparent 32%), var(--bg);
-            color: var(--ink);
-        }
-        .nav {
-            min-height: 72px;
-            padding: 0 7vw;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(219, 227, 239, 0.8);
-            background: rgba(255, 255, 255, 0.86);
-            backdrop-filter: blur(14px);
-        }
-        .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; }
-        .brand-mark {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: grid;
-            place-items: center;
-            color: white;
-            background: linear-gradient(135deg, var(--brand), var(--indigo));
-        }
-        .nav a { color: var(--brand); font-weight: 800; text-decoration: none; }
-        .shell {
-            min-height: calc(100vh - 72px);
-            padding: 46px 7vw;
-            display: grid;
-            grid-template-columns: minmax(320px, 450px) minmax(280px, 1fr);
-            gap: 44px;
-            align-items: center;
-        }
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-            padding: 28px;
-        }
-        .card h1 { margin: 0 0 8px; font-size: 1.7rem; }
-        .hint { margin: 0 0 22px; color: var(--muted); line-height: 1.5; }
-        label { display: block; margin: 15px 0 8px; font-weight: 800; color: #344054; }
-        input, select {
-            width: 100%;
-            min-height: 46px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 0 14px;
-            font: inherit;
-            background: #fbfdff;
-            color: var(--ink);
-        }
-        input:focus, select:focus {
-            outline: 3px solid rgba(37, 99, 235, 0.14);
-            border-color: var(--brand);
-        }
-        .btn {
-            width: 100%;
-            min-height: 46px;
-            margin-top: 20px;
-            border: 0;
-            border-radius: 12px;
-            color: white;
-            background: linear-gradient(135deg, var(--teal), var(--brand));
-            font-weight: 900;
-            cursor: pointer;
-            box-shadow: 0 12px 26px rgba(15, 118, 110, 0.22);
-        }
-        .btn:disabled { opacity: 0.65; cursor: wait; }
-        .copy h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.7rem); line-height: 1; }
-        .copy p { color: var(--muted); font-size: 1.08rem; line-height: 1.7; max-width: 640px; }
-        .pill-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
-        .pill {
-            padding: 9px 12px;
-            border-radius: 999px;
-            background: white;
-            border: 1px solid var(--line);
-            color: var(--muted);
-            font-weight: 800;
-        }
-        .message {
-            display: none;
-            margin: 0 0 16px;
-            padding: 12px 14px;
-            border-radius: 12px;
-            font-weight: 700;
-            line-height: 1.45;
-        }
-        .message.error { display: block; color: var(--danger); background: #fef3f2; border: 1px solid #fecdca; }
-        .message.success { display: block; color: var(--success); background: #ecfdf3; border: 1px solid #abefc6; }
-        .links { margin-top: 18px; color: var(--muted); text-align: center; }
-        .links a { color: var(--brand); font-weight: 800; text-decoration: none; }
-        @media (max-width: 860px) {
-            .shell { grid-template-columns: 1fr; padding-top: 32px; }
-            .copy { order: -1; }
-        }
+        :root { --bg:#eef5ff; --sidebar:#fbfdff; --card:#fbfcff; --text:#2d3748; --muted:#8da0bd; --line:#dde8f6; --blue:#5b9dec; --teal:#65c8a7; --danger:#ef4444; --success:#15803d; --shadow:0 16px 40px rgba(61,83,120,.08); --radius:22px; }
+        *{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+        .app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;padding:28px 20px;background:var(--sidebar);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:34px}
+        .brand{display:flex;align-items:center;gap:14px;font-size:1.25rem;font-weight:900;text-decoration:none;color:var(--text)}.brand-icon{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;color:white;background:linear-gradient(135deg,var(--blue),var(--teal));font-weight:900}
+        .nav{display:grid;gap:10px}.nav a{min-height:52px;padding:0 16px;border-radius:16px;display:flex;align-items:center;gap:14px;color:#617492;font-weight:800;text-decoration:none}.nav a:hover{background:#edf5ff;color:var(--text)}
+        .main{min-width:0}.topbar{height:72px;border-bottom:1px solid var(--line);background:rgba(251,253,255,.84);display:flex;justify-content:flex-end;align-items:center;padding:0 28px}.content{width:min(980px,calc(100% - 64px));margin:0 auto;padding:52px 0}
+        .auth-layout{display:grid;grid-template-columns:420px 1fr;gap:32px;align-items:center}.hero h1{margin:0;font-size:clamp(2.2rem,4vw,3.4rem);line-height:1}.hero p{color:var(--muted);font-size:1.08rem;font-weight:650;line-height:1.65}
+        .card{background:var(--card);border:1px solid #edf3fb;border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}.card h1{margin:0 0 8px}.hint{margin:0 0 22px;color:var(--muted);font-weight:650}.alert{display:none;margin:0 0 16px;padding:14px 16px;border-radius:16px;font-weight:800}.alert.error{display:block;color:#b42318;background:#fef3f2;border:1px solid #fecdca}.alert.success{display:block;color:var(--success);background:#ecfdf3;border:1px solid #abefc6}
+        label{display:block;color:#617492;font-weight:850;margin:14px 0 8px}input,select{width:100%;min-height:50px;border:1px solid #d8e5f5;border-radius:16px;padding:0 16px;background:white;color:var(--text);font:inherit}input:focus,select:focus{outline:0;border-color:#8bc1ff;box-shadow:0 0 0 4px rgba(91,157,236,.16)}
+        .btn{width:100%;min-height:50px;border:0;border-radius:16px;margin-top:18px;color:white;background:linear-gradient(135deg,var(--blue),var(--teal));font:inherit;font-weight:900;cursor:pointer}.btn:disabled{opacity:.65;cursor:wait}.links{text-align:center;color:var(--muted);font-weight:700}.links a{color:#2563eb;font-weight:900;text-decoration:none}
+        @media(max-width:860px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto}.content{width:min(100% - 28px,980px);padding:36px 0}.auth-layout{grid-template-columns:1fr}.hero{order:-1}}
     </style>
 </head>
 <body>
-    <header class="nav">
-        <div class="brand"><div class="brand-mark">SC</div><span>Smart Campus</span></div>
-        <a href="/">Home</a>
-    </header>
-
-    <main class="shell">
-        <section class="card">
-            <h1>Create account</h1>
-            <p class="hint">Register a campus user for the booking demo.</p>
-            <div id="message" class="message"></div>
-            <form id="registerForm">
-                <label for="full_name">Full name</label>
-                <input id="full_name" type="text" autocomplete="name" required />
-
-                <label for="email">Email</label>
-                <input id="email" type="email" autocomplete="email" required />
-
-                <label for="password">Password</label>
-                <input id="password" type="password" autocomplete="new-password" minlength="6" required />
-
-                <label for="role">Role</label>
-                <select id="role" required>
-                    <option value="Student">Student</option>
-                    <option value="Professor">Professor</option>
-                    <option value="Admin">Admin</option>
-                </select>
-
-                <button id="registerBtn" class="btn" type="submit">Register</button>
-            </form>
-            <p class="links">Already registered? <a href="/login">Login</a></p>
-        </section>
-
-        <section class="copy">
-            <h2>Book smarter across campus.</h2>
-            <p>Use secure login, room discovery, and booking conflict checks to keep shared spaces organized.</p>
-            <div class="pill-row">
-                <span class="pill">Room Search</span>
-                <span class="pill">JWT Protected</span>
-                <span class="pill">Conflict Checks</span>
-            </div>
-        </section>
-    </main>
-
+    <div class="app">
+        <aside class="sidebar">
+            <a class="brand" href="/"><span class="brand-icon">SC</span><span>Smart Campus</span></a>
+            <nav class="nav">
+                <a href="/">▦ Dashboard</a>
+                <a href="/rooms-ui">▥ Rooms</a>
+                <a href="/bookings-ui">▣ My Bookings</a>
+            </nav>
+        </aside>
+        <main class="main">
+            <div class="topbar">♢</div>
+            <section class="content auth-layout">
+                <section class="card">
+                    <h1>Create account</h1><p class="hint">Register a campus user for booking access.</p>
+                    <div id="message" class="alert"></div>
+                    <form id="registerForm">
+                        <label for="full_name">Full name</label><input id="full_name" type="text" autocomplete="name" required />
+                        <label for="email">Email</label><input id="email" type="email" autocomplete="email" required />
+                        <label for="password">Password</label><input id="password" type="password" autocomplete="new-password" minlength="6" required />
+                        <label for="role">Role</label><select id="role" required><option value="Student">Student</option><option value="Professor">Professor</option><option value="Admin">Admin</option></select>
+                        <button id="registerBtn" class="btn" type="submit">Register</button>
+                    </form>
+                    <p class="links">Already registered? <a href="/login">Login</a></p>
+                </section>
+                <div class="hero"><h1>Join Smart Campus.</h1><p>Create your account and move into room discovery, booking, and schedule management.</p></div>
+            </section>
+        </main>
+    </div>
     <script>
-        const registerForm = document.getElementById('registerForm');
-        const registerBtn = document.getElementById('registerBtn');
-        const message = document.getElementById('message');
-
-        function showMessage(text, type) {
-            message.textContent = text;
-            message.className = 'message ' + type;
-        }
-
-        registerForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            registerBtn.disabled = true;
-            message.className = 'message';
-
-            const full_name = document.getElementById('full_name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const role = document.getElementById('role').value;
-
-            try {
-                const res = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ full_name, email, password, role })
-                });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    showMessage(data.error || data.message || 'Registration failed', 'error');
-                    return;
-                }
-                showMessage('Registration successful. Opening login...', 'success');
-                window.location.href = '/login';
-            } catch (error) {
-                showMessage('Network error. Please try again.', 'error');
-            } finally {
-                registerBtn.disabled = false;
-            }
-        });
+        const registerForm=document.getElementById('registerForm');const registerBtn=document.getElementById('registerBtn');const message=document.getElementById('message');
+        function showMessage(text,type){message.textContent=text;message.className='alert '+type}
+        registerForm.addEventListener('submit',async(event)=>{event.preventDefault();registerBtn.disabled=true;registerBtn.textContent='Creating account...';message.className='alert';const full_name=document.getElementById('full_name').value.trim();const email=document.getElementById('email').value.trim();const password=document.getElementById('password').value;const role=document.getElementById('role').value;try{const res=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({full_name,email,password,role})});const data=await res.json().catch(()=>({}));if(!res.ok){showMessage(data.error||data.message||'Registration failed','error');return}localStorage.setItem('sc_full_name',full_name);showMessage('Registration successful. Opening login...','success');window.location.href='/login'}catch(error){showMessage('Network error. Please try again.','error')}finally{registerBtn.disabled=false;registerBtn.textContent='Register'}});
     </script>
 </body>
 </html>

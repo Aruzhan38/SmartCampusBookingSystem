@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"room-service/internal/config"
+	"room-service/internal/domain"
 	"room-service/internal/repository"
 	grpcServer "room-service/internal/transport/grpc"
 	"room-service/internal/usecase"
@@ -27,9 +28,9 @@ func main() {
 		log.Fatal("failed to connect database: ", err)
 	}
 
-	//if err := db.AutoMigrate(&domain.Room{}); err != nil {
-	//	log.Fatal("failed to migrate database: ", err)
-	//}
+	if err := db.AutoMigrate(&domain.Room{}); err != nil {
+		log.Fatal("failed to migrate database: ", err)
+	}
 
 	repo := repository.NewRoomRepository(db)
 	uc := usecase.NewRoomUsecase(repo)
