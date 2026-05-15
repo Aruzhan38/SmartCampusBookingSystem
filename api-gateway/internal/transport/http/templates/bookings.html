@@ -167,6 +167,7 @@
             background: #eef2ff;
             color: var(--brand-dark);
         }
+        .status.pending { background: #f7f3ff; color: #6b21a8; }
         .status.cancelled { background: #fee4e2; color: var(--danger); }
         .status.confirmed { background: #ecfdf3; color: var(--success); }
         .status.rejected { background: #fff7ed; color: var(--amber); }
@@ -189,11 +190,7 @@
 <body>
     <header class="nav">
         <div class="brand"><div class="brand-mark">SC</div><span>Bookings Dashboard</span></div>
-        <nav class="nav-actions">
-            <a class="btn" href="/">Home</a>
-            <a class="btn" href="/rooms-ui">Rooms</a>
-            <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
-        </nav>
+        <nav class="nav-actions" id="navbarLinks"></nav>
     </header>
 
     <main class="page">
@@ -258,7 +255,7 @@
                     </form>
                 </div>
 
-                <div class="panel">
+                <div class="panel" id="statusBookingPanel">
                     <h2>Update Status</h2>
                     <form id="statusBookingForm">
                         <label for="status_booking_id">Booking ID</label>
@@ -268,7 +265,6 @@
                         <select id="booking_status" required>
                             <option value="PENDING" disabled>Pending</option>
                             <option value="CONFIRMED" selected>Confirmed</option>
-                            <option value="CANCELLED">Cancelled</option>
                             <option value="REJECTED">Rejected</option>
                         </select>
 
@@ -305,6 +301,7 @@
 
     <script>
         const token = localStorage.getItem('sc_token');
+        const navbarLinks = document.getElementById('navbarLinks');
         const message = document.getElementById('message');
         const bookingsBody = document.getElementById('bookingsBody');
         const bookingsTitle = document.getElementById('bookingsTitle');
@@ -319,11 +316,59 @@
             message.textContent = '';
         }
 
+        function renderNavbar(isAdmin = false) {
+            if (token) {
+                const bookingsLabel = isAdmin ? 'All Bookings' : 'My Bookings';
+                navbarLinks.innerHTML = `
+                    <a class="btn" href="/">Home</a>
+                    <a class="btn" href="/rooms-ui">Rooms</a>
+                    <a class="btn" href="/bookings-ui">${bookingsLabel}</a>
+                    <a class="btn" href="/profile">Profile</a>
+                    <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
+                `;
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    localStorage.removeItem('sc_token');
+                    window.location.href = '/login';
+                });
+            } else {
+                navbarLinks.innerHTML = `
+                    <a class="btn" href="/">Home</a>
+                    <a class="btn btn-primary" href="/login">Login</a>
+                `;
+            }
+        }
+
         function authHeaders() {
             return {
                 'Content-Type': 'application/json',
                 Authorization: 'Bearer ' + localStorage.getItem('sc_token')
             };
+        }
+
+        async function loadProfileAndRenderPage() {
+            try {
+                const profileRes = await fetch('/api/profile', { headers: authHeaders() });
+                const profile = await parseResponse(profileRes);
+                const isAdmin = String(profile.role).toLowerCase() === 'admin';
+                renderNavbar(isAdmin);
+
+                if (isAdmin) {
+                    bookingsTitle.textContent = 'All Bookings';
+                    document.querySelector('.subtle').textContent = 'Review all booking requests and approve or reject bookings for the campus.';
+                    await loadAllBookings();
+                } else {
+                    bookingsTitle.textContent = 'My Bookings';
+                    document.querySelector('.subtle').textContent = 'Request bookings for your account and track approval status.';
+                    document.getElementById('create_user_id').value = profile.id;
+                    document.getElementById('create_user_id').disabled = true;
+                    document.getElementById('list_user_id').value = profile.id;
+                    document.getElementById('cancel_user_id').value = profile.id;
+                    await loadUserBookings(profile.id);
+                    document.getElementById('statusBookingPanel').style.display = 'none';
+                }
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
         }
 
         async function parseResponse(res) {
@@ -344,6 +389,15 @@
             if (data.booking) return [data.booking];
             if (data.Booking) return [data.Booking];
             return [];
+        }
+
+        async function loadAllBookings() {
+            const res = await fetch('/bookings/all', {
+                headers: authHeaders()
+            });
+            const data = await parseResponse(res);
+            renderBookings(data, 'All Bookings');
+            return data;
         }
 
         function formatDate(value) {
@@ -383,6 +437,44 @@
             return new Date(value).toISOString();
         }
 
+        function setDateTimeLimitsFor(dateStr) {
+            // dateStr expected in YYYY-MM-DD
+            if (!dateStr) return;
+            const startInput = document.getElementById('create_start_time');
+            const endInput = document.getElementById('create_end_time');
+            const createBtn = document.querySelector('#createBookingForm .btn-primary');
+
+            const d = new Date(dateStr + 'T00:00');
+            if (isNaN(d.getTime())) return;
+            // Sunday is 0
+            if (d.getDay() === 0) {
+                showMessage('Bookings are not allowed on Sundays.', 'error');
+                if (startInput) startInput.disabled = true;
+                if (endInput) endInput.disabled = true;
+                if (createBtn) createBtn.disabled = true;
+                return;
+            }
+
+            if (startInput) startInput.disabled = false;
+            if (endInput) endInput.disabled = false;
+            if (createBtn) createBtn.disabled = false;
+
+            const minVal = dateStr + 'T08:00';
+            const maxVal = dateStr + 'T22:00';
+            // set ISO-like values for min/max (datetime-local expects YYYY-MM-DDTHH:MM)
+            startInput.setAttribute('min', minVal);
+            startInput.setAttribute('max', maxVal);
+            endInput.setAttribute('min', minVal);
+            endInput.setAttribute('max', maxVal);
+            clearMessage();
+        }
+
+        function extractDateFromDateTime(val) {
+            if (!val) return null;
+            const parts = val.split('T');
+            return parts[0] || null;
+        }
+
         async function loadUserBookings(userID) {
             const res = await fetch('/bookings/my?user_id=' + encodeURIComponent(userID), {
                 headers: authHeaders()
@@ -397,28 +489,71 @@
             document.getElementById('cancel_user_id').value = userID;
         }
 
+        renderNavbar();
+
         if (!token) {
             showMessage('Please login first. Redirecting to login...', 'info');
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1200);
+        } else {
+            loadProfileAndRenderPage();
         }
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('sc_token');
-            window.location.href = '/login';
-        });
+        const logoutButton = document.getElementById('logoutBtn');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                localStorage.removeItem('sc_token');
+                window.location.href = '/login';
+            });
+        }
 
         document.getElementById('createBookingForm').addEventListener('submit', async (event) => {
             event.preventDefault();
             clearMessage();
 
             const userID = document.getElementById('create_user_id').value;
+            const startVal = document.getElementById('create_start_time').value;
+            const endVal = document.getElementById('create_end_time').value;
+            if (!startVal || !endVal) {
+                showMessage('Start and end time are required.', 'error');
+                return;
+            }
+            const start = new Date(startVal);
+            const end = new Date(endVal);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+                showMessage('Invalid date/time format.', 'error');
+                return;
+            }
+            if (start >= end) {
+                showMessage('Start time must be before end time.', 'error');
+                return;
+            }
+            // Sunday (0) bookings are not allowed
+            if (start.getDay() === 0) {
+                showMessage('Bookings are not allowed on Sundays.', 'error');
+                return;
+            }
+            // Booking must be within a single calendar day
+            if (start.toDateString() !== end.toDateString()) {
+                showMessage('Booking must be within a single calendar day.', 'error');
+                return;
+            }
+            // Allowed hours: 08:00 - 22:00 (end time may be exactly 22:00)
+            if (start.getHours() < 8) {
+                showMessage('Bookings may start no earlier than 08:00.', 'error');
+                return;
+            }
+            if (end.getHours() > 22 || (end.getHours() === 22 && end.getMinutes() > 0)) {
+                showMessage('Bookings must end by 22:00.', 'error');
+                return;
+            }
+
             const body = {
                 user_id: Number(userID),
                 room_id: Number(document.getElementById('create_room_id').value),
-                start_time: toISOStringFromLocal(document.getElementById('create_start_time').value),
-                end_time: toISOStringFromLocal(document.getElementById('create_end_time').value),
+                start_time: toISOStringFromLocal(startVal),
+                end_time: toISOStringFromLocal(endVal),
                 purpose: document.getElementById('create_purpose').value.trim()
             };
 
@@ -450,6 +585,20 @@
                 showMessage(error.message, 'error');
             }
         });
+
+        // Set datetime-local min/max when date part changes and prevent Sundays
+        const startInput = document.getElementById('create_start_time');
+        const endInput = document.getElementById('create_end_time');
+        if (startInput && endInput) {
+            function onDateTimeChange() {
+                const datePart = extractDateFromDateTime(startInput.value) || extractDateFromDateTime(endInput.value);
+                if (datePart) setDateTimeLimitsFor(datePart);
+            }
+            startInput.addEventListener('input', onDateTimeChange);
+            endInput.addEventListener('input', onDateTimeChange);
+            // Initialize limits if values present
+            onDateTimeChange();
+        }
 
         document.getElementById('cancelBookingForm').addEventListener('submit', async (event) => {
             event.preventDefault();

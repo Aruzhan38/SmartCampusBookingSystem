@@ -46,6 +46,31 @@
             background: linear-gradient(135deg, var(--brand), var(--indigo));
         }
         .nav a { color: var(--brand); font-weight: 800; text-decoration: none; }
+        .nav-links { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+        .btn {
+            min-height: 42px;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand), var(--indigo));
+            color: white;
+            box-shadow: 0 12px 26px rgba(37, 99, 235, 0.28);
+        }
+        .btn-soft {
+            color: var(--brand-dark);
+            background: #eaf1ff;
+        }
         .shell {
             min-height: calc(100vh - 72px);
             padding: 54px 7vw;
@@ -80,7 +105,7 @@
             outline: 3px solid rgba(37, 99, 235, 0.14);
             border-color: var(--brand);
         }
-        .btn {
+        .btn-submit {
             width: 100%;
             min-height: 46px;
             margin-top: 20px;
@@ -92,7 +117,7 @@
             cursor: pointer;
             box-shadow: 0 12px 26px rgba(37, 99, 235, 0.26);
         }
-        .btn:disabled { opacity: 0.65; cursor: wait; }
+        .btn-submit:disabled { opacity: 0.65; cursor: wait; }
         .message {
             display: none;
             margin: 0 0 16px;
@@ -108,13 +133,16 @@
         @media (max-width: 820px) {
             .shell { grid-template-columns: 1fr; padding-top: 34px; }
             .copy { display: none; }
+            .nav { align-items: flex-start; padding-top: 16px; padding-bottom: 16px; flex-direction: column; gap: 14px; }
+            .nav-links { width: 100%; }
+            .btn { width: 100%; }
         }
     </style>
 </head>
 <body>
     <header class="nav">
         <div class="brand"><div class="brand-mark">SC</div><span>Smart Campus</span></div>
-        <a href="/">Home</a>
+        <nav class="nav-links" id="navbarLinks"></nav>
     </header>
 
     <main class="shell">
@@ -133,7 +161,7 @@
                 <label for="password">Password</label>
                 <input id="password" type="password" autocomplete="current-password" required />
 
-                <button id="loginBtn" class="btn" type="submit">Login</button>
+                <button id="loginBtn" class="btn-submit" type="submit">Login</button>
             </form>
             <p class="links">No account yet? <a href="/register">Create one</a></p>
         </section>
@@ -141,6 +169,34 @@
 
     <script>
         const loginForm = document.getElementById('loginForm');
+        const navbarLinks = document.getElementById('navbarLinks');
+        const isAuthenticated = !!localStorage.getItem('sc_token');
+
+        function logout() {
+            localStorage.removeItem('sc_token');
+            window.location.href = '/login';
+        }
+
+        function renderNavbar() {
+            if (isAuthenticated) {
+                navbarLinks.innerHTML = `
+                    <a class="btn btn-soft" href="/">Home</a>
+                    <a class="btn btn-soft" href="/rooms-ui">Rooms</a>
+                    <a class="btn btn-soft" href="/bookings-ui">My Bookings</a>
+                    <a class="btn btn-soft" href="/profile">Profile</a>
+                    <button class="btn btn-primary" type="button" id="logoutBtn">Logout</button>
+                `;
+                document.getElementById('logoutBtn').addEventListener('click', logout);
+            } else {
+                navbarLinks.innerHTML = `
+                    <a class="btn btn-soft" href="/">Home</a>
+                    <a class="btn btn-primary" href="/login">Login</a>
+                `;
+            }
+        }
+
+        renderNavbar();
+
         const loginBtn = document.getElementById('loginBtn');
         const message = document.getElementById('message');
 

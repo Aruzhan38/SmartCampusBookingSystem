@@ -33,6 +33,12 @@ type updateBookingStatusRequest struct {
 }
 
 func (h *BookingHandler) CreateBooking(c *gin.Context) {
+	user, ok := getUserFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	var req createBookingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -41,7 +47,6 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		return
 	}
 
-	// TODO: extract user_id from JWT claims instead of trusting the request body.
 	if err := validateRFC3339(req.StartTime, "start_time"); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -55,6 +60,10 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		return
 	}
 
+	if !isAdmin(user) {
+		req.UserID = uint(user.ID)
+	}
+
 	resp, err := h.bookingClient.CreateBooking(
 		c.Request.Context(),
 		req.UserID,
@@ -62,6 +71,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		req.StartTime,
 		req.EndTime,
 		req.Purpose,
+		user.Role,
 	)
 	if err != nil {
 		c.JSON(bookingErrorStatus(err), gin.H{
@@ -94,12 +104,23 @@ func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 }
 
 func (h *BookingHandler) ListUserBookings(c *gin.Context) {
+	user, ok := getUserFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	userIDParam := c.Query("user_id")
 	userID, err := parsePositiveUintParam(userIDParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "user_id query parameter must be a positive integer",
 		})
+		return
+	}
+
+	if !isAdmin(user) && uint(userID) != uint(user.ID) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can query other users' bookings"})
 		return
 	}
 
@@ -114,7 +135,36 @@ func (h *BookingHandler) ListUserBookings(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+func (h *BookingHandler) ListAllBookings(c *gin.Context) {
+	user, ok := getUserFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if !isAdmin(user) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can view all bookings"})
+		return
+	}
+
+	resp, err := h.bookingClient.ListUserBookings(c.Request.Context(), 0)
+	if err != nil {
+		c.JSON(bookingErrorStatus(err), gin.H{
+			"error": status.Convert(err).Message(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
 func (h *BookingHandler) CancelBooking(c *gin.Context) {
+	user, ok := getUserFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
 	id := c.Param("id")
 	if _, err := parsePositiveUintParam(id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -132,6 +182,11 @@ func (h *BookingHandler) CancelBooking(c *gin.Context) {
 		return
 	}
 
+	if !isAdmin(user) && uint(userID) != uint(user.ID) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can cancel other users' bookings"})
+		return
+	}
+
 	resp, err := h.bookingClient.CancelBooking(c.Request.Context(), id, uint(userID))
 	if err != nil {
 		c.JSON(bookingErrorStatus(err), gin.H{
@@ -144,6 +199,17 @@ func (h *BookingHandler) CancelBooking(c *gin.Context) {
 }
 
 func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
+	user, ok := getUserFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	if !isAdmin(user) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can update booking status"})
+		return
+	}
+
 	id := c.Param("id")
 	if _, err := parsePositiveUintParam(id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

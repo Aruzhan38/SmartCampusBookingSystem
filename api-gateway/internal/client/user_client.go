@@ -3,12 +3,14 @@ package client
 import (
 	"api-gateway/internal/domain"
 	"context"
-	"fmt"
+	"errors"
 	"strconv"
 
 	pb "github.com/Aruzhan38/smart-campus-generated/proto/user"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UserClient interface {
@@ -31,7 +33,7 @@ func (uc *userClient) ValidateToken(ctx context.Context, token string) (*domain.
 		return nil, err
 	}
 	if !resp.Valid {
-		return nil, fmt.Errorf(resp.Message)
+		return nil, errors.New(resp.Message)
 	}
 	// Get full user info
 	userResp, err := uc.client.GetUserById(ctx, &pb.GetUserByIdRequest{UserId: resp.UserId})
@@ -53,6 +55,9 @@ func (uc *userClient) ValidateToken(ctx context.Context, token string) (*domain.
 func (uc *userClient) LoginUser(ctx context.Context, email, password string) (string, error) {
 	resp, err := uc.client.LoginUser(ctx, &pb.LoginUserRequest{Email: email, Password: password})
 	if err != nil {
+		if st, ok := status.FromError(err); ok && st.Code() == codes.Unauthenticated {
+			return "", errors.New("Invalid email or password")
+		}
 		return "", err
 	}
 	return resp.Token, nil

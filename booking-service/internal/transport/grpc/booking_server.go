@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strconv"
+	"strings"
 	"time"
 
 	"booking-service/internal/domain"
@@ -11,6 +12,7 @@ import (
 
 	bookingpb "github.com/Aruzhan38/smart-campus-generated/proto/booking"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
@@ -45,7 +47,14 @@ func (s *BookingServer) CreateBooking(ctx context.Context, req *bookingpb.Create
 		return nil, err
 	}
 
-	booking, err := s.usecase.CreateBooking(ctx, uint(userID), uint(roomID), startTime, endTime, req.Purpose)
+	statusValue := usecase.StatusConfirmed
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		if len(md.Get("user-role")) > 0 && !strings.EqualFold(md.Get("user-role")[0], "admin") {
+			statusValue = usecase.StatusPending
+		}
+	}
+
+	booking, err := s.usecase.CreateBooking(ctx, uint(userID), uint(roomID), startTime, endTime, req.Purpose, statusValue)
 	if err != nil {
 		return nil, bookingServiceError(err)
 	}
@@ -74,9 +83,9 @@ func (s *BookingServer) GetBookingById(ctx context.Context, req *bookingpb.GetBo
 }
 
 func (s *BookingServer) ListUserBookings(ctx context.Context, req *bookingpb.ListUserBookingsRequest) (*bookingpb.ListBookingsResponse, error) {
-	userID, err := parsePositiveUint(req.UserId)
+	userID, err := parseUintAllowZero(req.UserId)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "user_id must be a positive integer")
+		return nil, status.Error(codes.InvalidArgument, "user_id must be a non-negative integer")
 	}
 
 	bookings, err := s.usecase.ListUserBookings(ctx, uint(userID))
@@ -159,6 +168,17 @@ func parseRFC3339(value string, field string) (time.Time, error) {
 func parsePositiveUint(value string) (uint64, error) {
 	parsed, err := strconv.ParseUint(value, 10, 64)
 	if err != nil || parsed == 0 {
+		return 0, strconv.ErrSyntax
+	}
+	return parsed, nil
+}
+
+func parseUintAllowZero(value string) (uint64, error) {
+	if value == "" {
+		return 0, nil
+	}
+	parsed, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
 		return 0, strconv.ErrSyntax
 	}
 	return parsed, nil

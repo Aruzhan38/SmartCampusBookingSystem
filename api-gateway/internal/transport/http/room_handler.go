@@ -2,8 +2,10 @@ package http
 
 import (
 	"api-gateway/internal/client"
+	"api-gateway/internal/domain"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/codes"
@@ -30,6 +32,19 @@ type updateRoomRequest struct {
 	Capacity    int32  `json:"capacity" binding:"required,min=1"`
 	BuildingID  string `json:"building_id" binding:"required"`
 	Description string `json:"description" binding:"required"`
+}
+
+func getUserFromContext(c *gin.Context) (*domain.User, bool) {
+	user, exists := c.Get("user")
+	if !exists {
+		return nil, false
+	}
+	u, ok := user.(*domain.User)
+	return u, ok
+}
+
+func isAdmin(user *domain.User) bool {
+	return user != nil && strings.EqualFold(user.Role, "admin")
 }
 
 func (h *RoomHandler) GetRooms(c *gin.Context) {
@@ -65,6 +80,12 @@ func (h *RoomHandler) GetRoomByID(c *gin.Context) {
 }
 
 func (h *RoomHandler) CreateRoom(c *gin.Context) {
+	user, ok := getUserFromContext(c)
+	if !ok || !isAdmin(user) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can create rooms"})
+		return
+	}
+
 	var req createRoomRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -93,6 +114,12 @@ func (h *RoomHandler) CreateRoom(c *gin.Context) {
 }
 
 func (h *RoomHandler) UpdateRoom(c *gin.Context) {
+	user, ok := getUserFromContext(c)
+	if !ok || !isAdmin(user) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only admins can update rooms"})
+		return
+	}
+
 	id := c.Param("id")
 	if _, err := parsePositiveUint(id); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

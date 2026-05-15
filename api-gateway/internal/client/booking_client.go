@@ -6,10 +6,11 @@ import (
 
 	bookingpb "github.com/Aruzhan38/smart-campus-generated/proto/booking"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type BookingClient interface {
-	CreateBooking(ctx context.Context, userID uint, roomID uint, startTime string, endTime string, purpose string) (*bookingpb.BookingResponse, error)
+	CreateBooking(ctx context.Context, userID uint, roomID uint, startTime string, endTime string, purpose string, role string) (*bookingpb.BookingResponse, error)
 	GetBookingByID(ctx context.Context, id string) (*bookingpb.BookingResponse, error)
 	ListUserBookings(ctx context.Context, userID uint) (*bookingpb.ListBookingsResponse, error)
 	CancelBooking(ctx context.Context, id string, userID uint) (*bookingpb.BookingResponse, error)
@@ -26,7 +27,10 @@ func NewBookingClient(conn *grpc.ClientConn) BookingClient {
 	}
 }
 
-func (c *bookingClient) CreateBooking(ctx context.Context, userID uint, roomID uint, startTime string, endTime string, purpose string) (*bookingpb.BookingResponse, error) {
+func (c *bookingClient) CreateBooking(ctx context.Context, userID uint, roomID uint, startTime string, endTime string, purpose string, role string) (*bookingpb.BookingResponse, error) {
+	if role != "" {
+		ctx = metadata.NewOutgoingContext(ctx, metadata.Pairs("user-role", role))
+	}
 	return c.client.CreateBooking(ctx, &bookingpb.CreateBookingRequest{
 		UserId:    strconv.Itoa(int(userID)),
 		RoomId:    strconv.Itoa(int(roomID)),

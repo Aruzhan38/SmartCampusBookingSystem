@@ -65,6 +65,7 @@ func main() {
 	r.GET("/rooms-ui", webHandler.RoomsPage)
 	r.GET("/bookings-ui", webHandler.BookingsPage)
 	r.GET("/bookings", webHandler.BookingsPage)
+	r.GET("/profile", webHandler.ProfilePage)
 
 	r.POST("/api/register", userHandler.Register)
 	r.POST("/api/login", userHandler.Login)
@@ -78,9 +79,11 @@ func main() {
 	protected.PUT("/rooms/:id", roomHandler.UpdateRoom)
 	protected.POST("/bookings", bookingHandler.CreateBooking)
 	protected.GET("/bookings/my", bookingHandler.ListUserBookings)
+	protected.GET("/bookings/all", bookingHandler.ListAllBookings)
 	protected.GET("/bookings/:id", bookingHandler.GetBookingByID)
 	protected.DELETE("/bookings/:id", bookingHandler.CancelBooking)
 	protected.PATCH("/bookings/:id/status", bookingHandler.UpdateBookingStatus)
+	protected.GET("/api/profile", userHandler.Profile)
 
 	log.Println("API Gateway listening on :" + cfg.HTTPPort)
 	if err := r.Run(":" + cfg.HTTPPort); err != nil {

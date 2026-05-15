@@ -179,11 +179,7 @@
 <body>
     <header class="nav">
         <div class="brand"><div class="brand-mark">SC</div><span>Rooms Dashboard</span></div>
-        <nav class="nav-actions">
-            <a class="btn" href="/">Home</a>
-            <a class="btn" href="/bookings-ui">My Bookings</a>
-            <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
-        </nav>
+        <nav class="nav-actions" id="navbarLinks"></nav>
     </header>
 
     <main class="page">
@@ -199,7 +195,7 @@
 
         <section class="grid">
             <aside>
-                <div class="panel">
+                <div class="panel" id="createRoomPanel">
                     <h2>Create Room</h2>
                     <form id="createRoomForm">
                         <label for="create_room_number">Room number</label>
@@ -232,7 +228,7 @@
                     </form>
                 </div>
 
-                <div class="panel">
+                <div class="panel" id="updateRoomPanel">
                     <h2>Update Room</h2>
                     <form id="updateRoomForm">
                         <label for="update_room_id">Room ID</label>
@@ -268,11 +264,10 @@
                                 <th>Capacity</th>
                                 <th>Building ID</th>
                                 <th>Description</th>
-                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="roomsBody">
-                            <tr><td class="empty" colspan="6">Load rooms to begin.</td></tr>
+                            <tr><td class="empty" colspan="5">Load rooms to begin.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -282,9 +277,11 @@
 
     <script>
         const token = localStorage.getItem('sc_token');
+        const navbarLinks = document.getElementById('navbarLinks');
         const message = document.getElementById('message');
         const roomsBody = document.getElementById('roomsBody');
         const roomsTitle = document.getElementById('roomsTitle');
+        const pageSubtitle = document.querySelector('.page-head .subtle');
 
         function showMessage(text, type) {
             message.textContent = text;
@@ -294,6 +291,27 @@
         function clearMessage() {
             message.className = 'message';
             message.textContent = '';
+        }
+
+        function renderNavbar() {
+            if (token) {
+                navbarLinks.innerHTML = `
+                    <a class="btn" href="/">Home</a>
+                    <a class="btn" href="/rooms-ui">Rooms</a>
+                    <a class="btn" href="/bookings-ui">My Bookings</a>
+                    <a class="btn" href="/profile">Profile</a>
+                    <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
+                `;
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    localStorage.removeItem('sc_token');
+                    window.location.href = '/login';
+                });
+            } else {
+                navbarLinks.innerHTML = `
+                    <a class="btn" href="/">Home</a>
+                    <a class="btn btn-primary" href="/login">Login</a>
+                `;
+            }
         }
 
         function authHeaders() {
@@ -319,6 +337,25 @@
             return data.rooms || data.Rooms || [];
         }
 
+        async function loadUserRole() {
+            try {
+                const profileRes = await fetch('/api/profile', { headers: authHeaders() });
+                const profile = await parseResponse(profileRes);
+                const isAdmin = String(profile.role).toLowerCase() === 'admin';
+                if (!isAdmin) {
+                    document.getElementById('createRoomPanel').style.display = 'none';
+                    document.getElementById('updateRoomPanel').style.display = 'none';
+                    if (pageSubtitle) {
+                        pageSubtitle.textContent = 'Search rooms by capacity and view room details. Room creation and update are reserved for admins.';
+                    }
+                }
+                return isAdmin;
+            } catch (error) {
+                showMessage(error.message, 'error');
+                return false;
+            }
+        }
+
         function renderRooms(data, title) {
             const rooms = getRooms(data);
             roomsTitle.textContent = title || 'Rooms';
@@ -338,7 +375,6 @@
                     <td>${roomValue(room, 'capacity', 'capacity')}</td>
                     <td>${roomValue(room, 'building_id', 'buildingId')}</td>
                     <td>${description}</td>
-                    <td>${roomValue(room, 'status', 'status') || 'Available'}</td>
                 `;
                 roomsBody.appendChild(row);
             });
@@ -352,13 +388,23 @@
             return data;
         }
 
+        async function initPage() {
+            const isAdmin = await loadUserRole();
+            await loadRooms().catch((error) => showMessage(error.message, 'error'));
+            if (!isAdmin) {
+                showMessage('Room creation and update are available to admins only.', 'info');
+            }
+        }
+
+        renderNavbar();
+
         if (!token) {
             showMessage('Please login first. Redirecting to login...', 'info');
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1200);
         } else {
-            loadRooms().catch((error) => showMessage(error.message, 'error'));
+            initPage();
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {

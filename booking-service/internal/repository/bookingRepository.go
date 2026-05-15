@@ -40,10 +40,15 @@ func (r *bookingRepository) GetByID(ctx context.Context, id uint) (*domain.Booki
 
 func (r *bookingRepository) ListByUserID(ctx context.Context, userID uint) ([]domain.Booking, error) {
 	var bookings []domain.Booking
-	err := r.db.WithContext(ctx).
-		Where("user_id = ?", userID).
+	query := r.db.WithContext(ctx).
 		Order("start_time desc").
-		Find(&bookings).Error
+		Model(&domain.Booking{})
+
+	if userID != 0 {
+		query = query.Where("user_id = ?", userID)
+	}
+
+	err := query.Find(&bookings).Error
 	return bookings, err
 }
 

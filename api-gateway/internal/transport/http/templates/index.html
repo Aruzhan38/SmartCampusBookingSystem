@@ -195,10 +195,7 @@
             <div class="brand-mark">SC</div>
             <span>Smart Campus</span>
         </div>
-        <nav class="nav-links">
-            <a class="btn btn-soft" href="/rooms-ui">Rooms</a>
-            <a class="btn btn-soft" href="/bookings-ui">My Bookings</a>
-            <a class="btn btn-primary" href="/login">Login</a>
+        <nav class="nav-links" id="navbarLinks">
         </nav>
     </header>
 
@@ -210,11 +207,9 @@
                 <p class="lead">
                     Find available rooms, manage study sessions, and prevent overlapping bookings with a simple dashboard built for campus teams.
                 </p>
-                <div class="hero-actions">
+                <div class="hero-actions" id="heroActions">
                     <a class="btn btn-primary" href="/register">Register</a>
                     <a class="btn btn-soft" href="/login">Login</a>
-                    <a class="btn btn-soft" href="/rooms-ui">Rooms</a>
-                    <a class="btn btn-soft" href="/bookings-ui">My Bookings</a>
                 </div>
             </div>
             <aside class="campus-panel" aria-label="Today's campus schedule preview">
@@ -273,5 +268,49 @@
             </div>
         </section>
     </main>
+    <script>
+        const isAuthenticated = !!localStorage.getItem('sc_token');
+        const navbarLinks = document.getElementById('navbarLinks');
+        const heroActions = document.getElementById('heroActions');
+
+        function logout() {
+            localStorage.removeItem('sc_token');
+            window.location.href = '/login';
+        }
+
+        function renderNavbar() {
+            if (isAuthenticated) {
+                navbarLinks.innerHTML = `
+                    <a class="btn btn-soft" href="/">Home</a>
+                    <a class="btn btn-soft" href="/rooms-ui">Rooms</a>
+                    <a class="btn btn-soft" href="/bookings-ui">My Bookings</a>
+                    <a class="btn btn-soft" href="/profile">Profile</a>
+                    <button class="btn btn-primary" type="button" id="logoutBtn">Logout</button>
+                `;
+                heroActions.innerHTML = `
+                    <a class="btn btn-soft" href="/rooms-ui">Rooms</a>
+                    <a class="btn btn-soft" href="/bookings-ui">My Bookings</a>
+                    <a class="btn btn-soft" href="/profile">Profile</a>
+                    <button class="btn btn-primary" type="button" id="logoutBtnHero">Logout</button>
+                `;
+            } else {
+                navbarLinks.innerHTML = `
+                    <a class="btn btn-soft" href="/">Home</a>
+                    <a class="btn btn-primary" href="/login">Login</a>
+                `;
+                heroActions.innerHTML = `
+                    <a class="btn btn-primary" href="/register">Register</a>
+                    <a class="btn btn-soft" href="/login">Login</a>
+                `;
+            }
+
+            const logoutBtn = document.getElementById('logoutBtn');
+            const logoutBtnHero = document.getElementById('logoutBtnHero');
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
+            if (logoutBtnHero) logoutBtnHero.addEventListener('click', logout);
+        }
+
+        renderNavbar();
+    </script>
 </body>
 </html>

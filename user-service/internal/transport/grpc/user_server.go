@@ -6,6 +6,8 @@ import (
 	"user-service/internal/usecase"
 
 	pb "github.com/Aruzhan38/smart-campus-generated/proto/user"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type userServer struct {
@@ -28,6 +30,9 @@ func (s *userServer) RegisterUser(ctx context.Context, req *pb.RegisterUserReque
 func (s *userServer) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (*pb.LoginUserResponse, error) {
 	token, err := s.usecase.LoginUser(req.Email, req.Password)
 	if err != nil {
+		if err == usecase.ErrInvalidCredentials {
+			return nil, status.Error(codes.Unauthenticated, "Invalid email or password")
+		}
 		return nil, err
 	}
 	return &pb.LoginUserResponse{Token: token}, nil

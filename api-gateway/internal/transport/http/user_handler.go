@@ -2,7 +2,9 @@ package http
 
 import (
 	"api-gateway/internal/client"
+	"api-gateway/internal/domain"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,6 +36,12 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
+	// Validate email domain
+	if !isValidStudentEmail(req.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only @astanait.edu.kz email addresses are allowed"})
+		return
+	}
+
 	if err := h.userClient.RegisterUser(c.Request.Context(), req.FullName, req.Email, req.Password, req.Role); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -56,4 +64,29 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (h *UserHandler) Profile(c *gin.Context) {
+	userValue, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	user, ok := userValue.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user context"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":        user.ID,
+		"full_name": user.FullName,
+		"email":     user.Email,
+		"role":      user.Role,
+	})
+}
+
+func isValidStudentEmail(email string) bool {
+	return strings.HasSuffix(strings.ToLower(email), "@astanait.edu.kz")
 }

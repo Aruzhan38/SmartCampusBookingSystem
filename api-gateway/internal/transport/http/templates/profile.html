@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile - Smart Campus Booking</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --surface: #ffffff;
+            --ink: #102033;
+            --muted: #667085;
+            --line: #dbe3ef;
+            --brand: #2563eb;
+            --indigo: #4f46e5;
+            --success: #047857;
+            --danger: #b42318;
+            --shadow: 0 14px 34px rgba(31, 41, 55, 0.1);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+        }
+        .nav {
+            min-height: 72px;
+            padding: 0 5vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(219, 227, 239, 0.86);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(14px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; }
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: white;
+            background: linear-gradient(135deg, var(--brand), var(--indigo));
+        }
+        .nav-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .nav-actions .btn {
+            min-height: 40px;
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 850;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--ink);
+            background: #eef2ff;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--brand), var(--indigo)); color: white; }
+        .btn-danger { background: #fee4e2; color: var(--danger); }
+        .page {
+            padding: 34px 5vw 56px;
+            display: grid;
+            gap: 22px;
+        }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            padding: 26px;
+        }
+        h1 { margin: 0 0 8px; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; }
+        .subtle { color: var(--muted); line-height: 1.6; margin: 12px 0 0; }
+        .profile-grid { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; gap: 22px; }
+        .profile-row { display: grid; gap: 10px; }
+        .profile-label { color: var(--muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .profile-value { font-size: 1.1rem; font-weight: 700; }
+        .message {
+            display: none;
+            margin: 0 0 18px;
+            padding: 13px 15px;
+            border-radius: 12px;
+            font-weight: 800;
+            line-height: 1.45;
+        }
+        .message.error { display: block; color: var(--danger); background: #fef3f2; border: 1px solid #fecdca; }
+        .message.info { display: block; color: var(--brand-dark); background: #eff6ff; border: 1px solid #bfdbfe; }
+        @media (max-width: 960px) {
+            .profile-grid { grid-template-columns: 1fr; }
+            .nav { flex-direction: column; align-items: flex-start; gap: 14px; padding-top: 16px; padding-bottom: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="nav">
+        <div class="brand"><div class="brand-mark">SC</div><span>Profile</span></div>
+        <nav class="nav-actions" id="navbarLinks"></nav>
+    </header>
+
+    <main class="page">
+        <section class="panel">
+            <h1>My Profile</h1>
+            <p class="subtle">Your account information is loaded from your active session.</p>
+            <div id="message" class="message"></div>
+        </section>
+        <section class="panel profile-grid">
+            <div class="profile-row">
+                <span class="profile-label">Full name</span>
+                <span class="profile-value" id="profileName">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="profile-label">Email</span>
+                <span class="profile-value" id="profileEmail">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="profile-label">Role</span>
+                <span class="profile-value" id="profileRole">—</span>
+            </div>
+            <div class="profile-row">
+                <span class="profile-label">User ID</span>
+                <span class="profile-value" id="profileID">—</span>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('sc_token');
+        const navbarLinks = document.getElementById('navbarLinks');
+        const message = document.getElementById('message');
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = 'message ' + type;
+        }
+
+        function logout() {
+            localStorage.removeItem('sc_token');
+            window.location.href = '/login';
+        }
+
+        function renderNavbar() {
+            if (token) {
+                navbarLinks.innerHTML = `
+                    <a class="btn" href="/">Home</a>
+                    <a class="btn" href="/rooms-ui">Rooms</a>
+                    <a class="btn" href="/bookings-ui">My Bookings</a>
+                    <a class="btn" href="/profile">Profile</a>
+                    <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
+                `;
+                document.getElementById('logoutBtn').addEventListener('click', logout);
+            } else {
+                navbarLinks.innerHTML = `
+                    <a class="btn" href="/">Home</a>
+                    <a class="btn btn-primary" href="/login">Login</a>
+                `;
+            }
+        }
+
+        async function loadProfile() {
+            const res = await fetch('/api/profile', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + token
+                }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                showMessage(data.error || data.message || 'Please login first', 'error');
+                setTimeout(() => window.location.href = '/login', 1200);
+                return;
+            }
+            document.getElementById('profileName').textContent = data.full_name || '—';
+            document.getElementById('profileEmail').textContent = data.email || '—';
+            document.getElementById('profileRole').textContent = data.role || '—';
+            document.getElementById('profileID').textContent = data.id || '—';
+        }
+
+        renderNavbar();
+
+        if (!token) {
+            showMessage('Please login first. Redirecting to login...', 'info');
+            setTimeout(() => window.location.href = '/login', 1200);
+        } else {
+            loadProfile();
+        }
+    </script>
+</body>
+</html>

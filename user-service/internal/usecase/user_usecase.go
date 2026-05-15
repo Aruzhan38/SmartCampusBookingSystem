@@ -7,6 +7,8 @@ import (
 	"user-service/internal/repository"
 )
 
+var ErrInvalidCredentials = errors.New("invalid credentials")
+
 type UserUsecase interface {
 	RegisterUser(fullName, email, password, role string) error
 	LoginUser(email, password string) (string, error)
@@ -45,10 +47,10 @@ func (u *userUsecase) RegisterUser(fullName, email, password, role string) error
 func (u *userUsecase) LoginUser(email, password string) (string, error) {
 	user, err := u.repo.GetByEmail(email)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return "", ErrInvalidCredentials
 	}
 	if !auth.CheckPasswordHash(password, user.PasswordHash) {
-		return "", errors.New("invalid credentials")
+		return "", ErrInvalidCredentials
 	}
 	return auth.GenerateJWT(user.ID, user.Email, user.Role, u.jwtSecret)
 }
