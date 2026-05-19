@@ -10,6 +10,8 @@ require (
 	google.golang.org/grpc v1.81.0
 )
 
+replace github.com/Aruzhan38/smart-campus-generated => ../smart-campus-generated
+
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect

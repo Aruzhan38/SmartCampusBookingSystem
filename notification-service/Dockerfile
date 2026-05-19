@@ -1,13 +1,15 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25 AS builder
 
 WORKDIR /app
+ENV CGO_ENABLED=0
 
-COPY go.mod go.sum ./
+COPY smart-campus-generated /smart-campus-generated
+COPY notification-service/go.mod notification-service/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY notification-service .
 
-RUN go build -o notification-service ./cmd/notificationService
+RUN go build -p=1 -o notification-service ./cmd/notificationService
 
 FROM alpine:latest
 

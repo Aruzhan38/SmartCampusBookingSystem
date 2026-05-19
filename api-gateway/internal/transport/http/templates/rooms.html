@@ -293,13 +293,14 @@
             message.textContent = '';
         }
 
-        function renderNavbar() {
+        function renderNavbar(isAdmin = false) {
             if (token) {
                 navbarLinks.innerHTML = `
                     <a class="btn" href="/">Home</a>
                     <a class="btn" href="/rooms-ui">Rooms</a>
                     <a class="btn" href="/bookings-ui">My Bookings</a>
                     <a class="btn" href="/profile">Profile</a>
+                    ${isAdmin ? '' : ''}
                     <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
                 `;
                 document.getElementById('logoutBtn').addEventListener('click', () => {

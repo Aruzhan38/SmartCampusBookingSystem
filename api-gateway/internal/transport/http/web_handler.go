@@ -50,3 +50,7 @@ func (h *WebHandler) BookingsPage(c *gin.Context) {
 func (h *WebHandler) ProfilePage(c *gin.Context) {
 	c.HTML(http.StatusOK, "profile.html", nil)
 }
+
+func (h *WebHandler) NotificationsPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "notifications.html", nil)
+}

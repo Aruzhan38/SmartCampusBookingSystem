@@ -2,49 +2,34 @@ package usecase
 
 import (
 	"context"
+	"strings"
 
-	"notification-service/internal/domain"
-	"notification-service/internal/repository"
+	"notification-service/internal/mail"
 )
 
 type NotificationUsecase interface {
-	SendNotification(ctx context.Context, userID uint, message, notificationType string) (*domain.Notification, error)
-	GetNotification(ctx context.Context, id uint) (*domain.Notification, error)
-	ListUserNotifications(ctx context.Context, userID uint) ([]domain.Notification, error)
-	MarkAsRead(ctx context.Context, id uint) (*domain.Notification, error)
+	SendNotification(ctx context.Context, recipientEmail, message, notificationType string) error
 }
 
 type notificationUsecase struct {
-	repo repository.NotificationRepository
+	sender mail.Sender
 }
 
-func NewNotificationUsecase(repo repository.NotificationRepository) NotificationUsecase {
-	return &notificationUsecase{repo: repo}
+func NewNotificationUsecase(sender mail.Sender) NotificationUsecase {
+	return &notificationUsecase{sender: sender}
 }
 
-func (u *notificationUsecase) SendNotification(ctx context.Context, userID uint, message, notificationType string) (*domain.Notification, error) {
-	notification := &domain.Notification{
-		UserID:  userID,
-		Message: message,
-		Type:    notificationType,
-		IsRead:  false,
+func (u *notificationUsecase) SendNotification(ctx context.Context, recipientEmail, message, notificationType string) error {
+	subject := "Smart Campus Notification"
+	switch strings.ToLower(notificationType) {
+	case "booking_confirmed":
+		subject = "Your booking has been approved"
+	case "booking_rejected":
+		subject = "Your booking request was rejected"
+	case "booking_cancelled":
+		subject = "Your booking has been cancelled"
+	case "booking_created":
+		subject = "Booking created"
 	}
-	return u.repo.Create(ctx, notification)
-}
-
-func (u *notificationUsecase) GetNotification(ctx context.Context, id uint) (*domain.Notification, error) {
-	return u.repo.GetByID(ctx, id)
-}
-
-func (u *notificationUsecase) ListUserNotifications(ctx context.Context, userID uint) ([]domain.Notification, error) {
-	return u.repo.ListByUserID(ctx, userID)
-}
-
-func (u *notificationUsecase) MarkAsRead(ctx context.Context, id uint) (*domain.Notification, error) {
-	notification, err := u.repo.GetByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	notification.IsRead = true
-	return u.repo.Update(ctx, notification)
+	return u.sender.SendEmail(ctx, recipientEmail, subject, message)
 }

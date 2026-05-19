@@ -3,8 +3,10 @@ package http
 import (
 	"api-gateway/internal/client"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,11 +15,13 @@ import (
 )
 
 type BookingHandler struct {
-	bookingClient client.BookingClient
+	bookingClient      client.BookingClient
+	notificationClient client.NotificationClient
+	userClient         client.UserClient
 }
 
-func NewBookingHandler(bookingClient client.BookingClient) *BookingHandler {
-	return &BookingHandler{bookingClient: bookingClient}
+func NewBookingHandler(bookingClient client.BookingClient, notificationClient client.NotificationClient, userClient client.UserClient) *BookingHandler {
+	return &BookingHandler{bookingClient: bookingClient, notificationClient: notificationClient, userClient: userClient}
 }
 
 type createBookingRequest struct {
@@ -232,6 +236,37 @@ func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 			"error": status.Convert(err).Message(),
 		})
 		return
+	}
+
+	if strings.EqualFold(req.Status, "Confirmed") || strings.EqualFold(req.Status, "Rejected") || strings.EqualFold(req.Status, "Cancelled") {
+		bookingUserID := resp.Booking.GetUserId()
+		bookingUser, err := h.userClient.GetUserByID(c.Request.Context(), bookingUserID)
+		if err != nil {
+			log.Printf("failed to resolve booking owner email: %v", err)
+		} else if bookingUser.Email != "" {
+			notificationType := "booking_confirmed"
+			emailBody := fmt.Sprintf("Hello %s,\n\nYour booking for room %s from %s to %s has been approved.\n\nThank you,\nSmart Campus Booking System", bookingUser.FullName, resp.Booking.RoomId, resp.Booking.StartTime, resp.Booking.EndTime)
+			if strings.EqualFold(req.Status, "Rejected") {
+				notificationType = "booking_rejected"
+				emailBody = fmt.Sprintf("Hello %s,\n\nYour booking for room %s from %s to %s has been rejected.\n\nPlease contact the administrator for details.\nSmart Campus Booking System", bookingUser.FullName, resp.Booking.RoomId, resp.Booking.StartTime, resp.Booking.EndTime)
+			} else if strings.EqualFold(req.Status, "Cancelled") {
+				notificationType = "booking_cancelled"
+				emailBody = fmt.Sprintf("Hello %s,\n\nYour booking for room %s from %s to %s has been cancelled.\n\nThank you,\nSmart Campus Booking System", bookingUser.FullName, resp.Booking.RoomId, resp.Booking.StartTime, resp.Booking.EndTime)
+			}
+
+			if _, err := h.notificationClient.SendNotification(
+				c.Request.Context(),
+				bookingUser.Email,
+				emailBody,
+				notificationType,
+			); err != nil {
+				log.Printf("failed to send notification email: %v", err)
+			} else {
+				log.Printf("notification email sent to %s for status %s", bookingUser.Email, req.Status)
+			}
+		} else {
+			log.Printf("booking owner %s has no email address", bookingUserID)
+		}
 	}
 
 	c.JSON(http.StatusOK, resp)

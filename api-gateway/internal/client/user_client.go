@@ -15,6 +15,7 @@ import (
 
 type UserClient interface {
 	ValidateToken(ctx context.Context, token string) (*domain.User, error)
+	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 	LoginUser(ctx context.Context, email, password string) (string, error)
 	RegisterUser(ctx context.Context, fullName, email, password, role string) error
 }
@@ -36,16 +37,20 @@ func (uc *userClient) ValidateToken(ctx context.Context, token string) (*domain.
 		return nil, errors.New(resp.Message)
 	}
 	// Get full user info
-	userResp, err := uc.client.GetUserById(ctx, &pb.GetUserByIdRequest{UserId: resp.UserId})
+	return uc.GetUserByID(ctx, resp.UserId)
+}
+
+func (uc *userClient) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
+	userResp, err := uc.client.GetUserById(ctx, &pb.GetUserByIdRequest{UserId: id})
 	if err != nil {
 		return nil, err
 	}
-	id, err := strconv.Atoi(userResp.User.Id)
+	userID, err := strconv.Atoi(userResp.User.Id)
 	if err != nil {
 		return nil, err
 	}
 	return &domain.User{
-		ID:       id,
+		ID:       userID,
 		FullName: userResp.User.FullName,
 		Email:    userResp.User.Email,
 		Role:     userResp.User.Role,

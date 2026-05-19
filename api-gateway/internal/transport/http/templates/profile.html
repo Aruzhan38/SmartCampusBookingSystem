@@ -146,13 +146,14 @@
             window.location.href = '/login';
         }
 
-        function renderNavbar() {
+        function renderNavbar(isAdmin = false) {
             if (token) {
                 navbarLinks.innerHTML = `
                     <a class="btn" href="/">Home</a>
                     <a class="btn" href="/rooms-ui">Rooms</a>
                     <a class="btn" href="/bookings-ui">My Bookings</a>
                     <a class="btn" href="/profile">Profile</a>
+                    ${isAdmin ? '' : ''}
                     <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
                 `;
                 document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -183,14 +184,37 @@
             document.getElementById('profileID').textContent = data.id || '—';
         }
 
-        renderNavbar();
+        async function initPage() {
+            if (!token) {
+                renderNavbar();
+                showMessage('Please login first. Redirecting to login...', 'info');
+                setTimeout(() => window.location.href = '/login', 1200);
+                return;
+            }
 
-        if (!token) {
-            showMessage('Please login first. Redirecting to login...', 'info');
-            setTimeout(() => window.location.href = '/login', 1200);
-        } else {
-            loadProfile();
+            renderNavbar();
+            const res = await fetch('/api/profile', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + token
+                }
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                showMessage(data.error || data.message || 'Please login first', 'error');
+                setTimeout(() => window.location.href = '/login', 1200);
+                return;
+            }
+
+            const isAdmin = String(data.role).toLowerCase() === 'admin';
+            renderNavbar(isAdmin);
+            document.getElementById('profileName').textContent = data.full_name || '—';
+            document.getElementById('profileEmail').textContent = data.email || '—';
+            document.getElementById('profileRole').textContent = data.role || '—';
+            document.getElementById('profileID').textContent = data.id || '—';
         }
+
+        initPage();
     </script>
 </body>
 </html>

@@ -49,6 +49,15 @@ func main() {
 	}
 	defer bookingConn.Close()
 	bookingClient := client.NewBookingClient(bookingConn)
+
+	// Connect to Notification Service
+	notificationConn, err := dialGRPC(cfg.NotificationServiceAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer notificationConn.Close()
+	notificationClient := client.NewNotificationClient(notificationConn)
+
 	// HTTP Server
 	r := gin.Default()
 
@@ -57,14 +66,13 @@ func main() {
 
 	userHandler := gatewayhttp.NewUserHandler(userClient)
 	roomHandler := gatewayhttp.NewRoomHandler(roomClient)
-	bookingHandler := gatewayhttp.NewBookingHandler(bookingClient)
+	bookingHandler := gatewayhttp.NewBookingHandler(bookingClient, notificationClient, userClient)
 
 	r.GET("/", webHandler.Index)
 	r.GET("/login", webHandler.LoginPage)
 	r.GET("/register", webHandler.RegisterPage)
 	r.GET("/rooms-ui", webHandler.RoomsPage)
 	r.GET("/bookings-ui", webHandler.BookingsPage)
-	r.GET("/bookings", webHandler.BookingsPage)
 	r.GET("/profile", webHandler.ProfilePage)
 
 	r.POST("/api/register", userHandler.Register)

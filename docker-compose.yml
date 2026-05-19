@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -51,21 +49,29 @@ services:
       postgres:
         condition: service_healthy
 
-  # notification-service temporarily disabled until proto/notification is available
-  # notification-service:
-  #   build: ./notification-service
-  #   environment:
-  #     GRPC_PORT: 50054
-  #   ports:
-  #     - "50054:50054"
-
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    environment:
+      GRPC_PORT: 50054
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "587"
+      SMTP_USERNAME: baktiar.kuan@gmail.com
+      SMTP_PASSWORD: Baktiyar@07
+      SMTP_FROM: baktiar.kuan@gmail.com
+    ports:
+      - "50054:50054"
   api-gateway:
-    build: ./api-gateway
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
     environment:
       HTTP_PORT: 8080
       USER_SERVICE_ADDR: user-service:50051
       ROOM_SERVICE_ADDR: room-service:50052
       BOOKING_SERVICE_ADDR: booking-service:50053
+      NOTIFICATION_SERVICE_ADDR: notification-service:50054
       JWT_SECRET: your-secret-key
     ports:
       - "8080:8080"
@@ -75,6 +81,8 @@ services:
       room-service:
         condition: service_started
       booking-service:
+        condition: service_started
+      notification-service:
         condition: service_started
 
 volumes:

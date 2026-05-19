@@ -38,7 +38,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 
 	// Validate email domain
 	if !isValidStudentEmail(req.Email) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Only @astanait.edu.kz email addresses are allowed"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Only @gmail.com email addresses are allowed"})
 		return
 	}
 
@@ -88,5 +88,6 @@ func (h *UserHandler) Profile(c *gin.Context) {
 }
 
 func isValidStudentEmail(email string) bool {
-	return strings.HasSuffix(strings.ToLower(email), "@astanait.edu.kz")
+	t := strings.ToLower(email)
+	return strings.HasSuffix(t, "@gmail.com")
 }

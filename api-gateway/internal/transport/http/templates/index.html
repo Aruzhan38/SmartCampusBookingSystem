@@ -278,7 +278,7 @@
             window.location.href = '/login';
         }
 
-        function renderNavbar() {
+        function renderNavbar(isAdmin = false) {
             if (isAuthenticated) {
                 navbarLinks.innerHTML = `
                     <a class="btn btn-soft" href="/">Home</a>
@@ -310,7 +310,30 @@
             if (logoutBtnHero) logoutBtnHero.addEventListener('click', logout);
         }
 
-        renderNavbar();
+        async function initNavbar() {
+            renderNavbar();
+            if (!isAuthenticated) {
+                return;
+            }
+
+            const token = localStorage.getItem('sc_token');
+            try {
+                const res = await fetch('/api/profile', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + token
+                    }
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.role) {
+                    renderNavbar(String(data.role).toLowerCase() === 'admin');
+                }
+            } catch (e) {
+                // ignore; keep default authenticated nav
+            }
+        }
+
+        initNavbar();
     </script>
 </body>
 </html>

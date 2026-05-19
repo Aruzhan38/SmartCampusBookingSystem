@@ -5,34 +5,19 @@ import (
 	"net"
 
 	"notification-service/internal/config"
-	"notification-service/internal/domain"
-	"notification-service/internal/repository"
+	"notification-service/internal/mail"
 	grpcServer "notification-service/internal/transport/grpc"
 	"notification-service/internal/usecase"
 
 	notificationpb "github.com/Aruzhan38/smart-campus-generated/proto/notification"
 	"google.golang.org/grpc"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
 	cfg := config.Load()
 
-	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN:                  cfg.DBURL,
-		PreferSimpleProtocol: true,
-	}), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect database: ", err)
-	}
-
-	if err := db.AutoMigrate(&domain.Notification{}); err != nil {
-		log.Fatal("failed to migrate database: ", err)
-	}
-
-	repo := repository.NewNotificationRepository(db)
-	uc := usecase.NewNotificationUsecase(repo)
+	sender := mail.NewSMTPSender(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.SMTPFrom)
+	uc := usecase.NewNotificationUsecase(sender)
 	server := grpcServer.NewNotificationServer(uc)
 
 	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)

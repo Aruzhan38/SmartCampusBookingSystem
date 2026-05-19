@@ -1,13 +1,15 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25 AS builder
 
 WORKDIR /app
+ENV CGO_ENABLED=0
 
-COPY go.mod go.sum ./
+COPY smart-campus-generated /smart-campus-generated
+COPY api-gateway/go.mod api-gateway/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY api-gateway .
 
-RUN go build -o api-gateway ./cmd/apiGateway
+RUN go build -p=1 -o api-gateway ./cmd/apiGateway
 
 FROM alpine:latest
 

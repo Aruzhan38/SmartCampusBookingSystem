@@ -324,6 +324,7 @@
                     <a class="btn" href="/rooms-ui">Rooms</a>
                     <a class="btn" href="/bookings-ui">${bookingsLabel}</a>
                     <a class="btn" href="/profile">Profile</a>
+                    ${isAdmin ? '' : ''}
                     <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
                 `;
                 document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -434,7 +435,13 @@
         }
 
         function toISOStringFromLocal(value) {
-            return new Date(value).toISOString();
+            const date = new Date(value);
+            const offset = -date.getTimezoneOffset();
+            const sign = offset >= 0 ? '+' : '-';
+            const pad = (num) => String(Math.abs(Math.floor(num))).padStart(2, '0');
+            const offsetHours = pad(offset / 60);
+            const offsetMinutes = pad(offset % 60);
+            return `${value}:00${sign}${offsetHours}:${offsetMinutes}`;
         }
 
         function setDateTimeLimitsFor(dateStr) {

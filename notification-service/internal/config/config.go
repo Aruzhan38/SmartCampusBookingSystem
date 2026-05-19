@@ -10,13 +10,18 @@ import (
 )
 
 type Config struct {
-	DBURL      string
-	DBHost     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBPort     string
-	GRPCPort   string
+	DBURL        string
+	DBHost       string
+	DBUser       string
+	DBPassword   string
+	DBName       string
+	DBPort       string
+	SMTPHost     string
+	SMTPPort     string
+	SMTPUsername string
+	SMTPPassword string
+	SMTPFrom     string
+	GRPCPort     string
 }
 
 func Load() *Config {
@@ -29,13 +34,18 @@ func Load() *Config {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	cfg := &Config{
-		DBURL:      getEnv("DB_URL", ""),
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", "notifications"),
-		DBPort:     getEnv("DB_PORT", "5432"),
-		GRPCPort:   getEnv("GRPC_PORT", "50054"),
+		DBURL:        getEnv("DB_URL", ""),
+		DBHost:       getEnv("DB_HOST", "localhost"),
+		DBUser:       getEnv("DB_USER", "postgres"),
+		DBPassword:   getEnv("DB_PASSWORD", ""),
+		DBName:       getEnv("DB_NAME", "notifications"),
+		DBPort:       getEnv("DB_PORT", "5432"),
+		SMTPHost:     getEnv("SMTP_HOST", "smtp.gmail.com"),
+		SMTPPort:     getEnv("SMTP_PORT", "587"),
+		SMTPUsername: getEnv("SMTP_USERNAME", ""),
+		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+		SMTPFrom:     getEnv("SMTP_FROM", "no-reply@smartcampus.local"),
+		GRPCPort:     getEnv("GRPC_PORT", "50054"),
 	}
 
 	if cfg.DBURL == "" {

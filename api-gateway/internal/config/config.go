@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	HTTPPort           string
-	UserServiceAddr    string
-	RoomServiceAddr    string
-	BookingServiceAddr string
-	JWTSecret          string
+	HTTPPort                string
+	UserServiceAddr         string
+	RoomServiceAddr         string
+	BookingServiceAddr      string
+	NotificationServiceAddr string
+	JWTSecret               string
 }
 
 func Load() *Config {
@@ -29,11 +30,12 @@ func Load() *Config {
 	}
 
 	return &Config{
-		HTTPPort:           firstNonEmpty(os.Getenv("HTTP_PORT"), viper.GetString("http.port")),
-		UserServiceAddr:    firstNonEmpty(os.Getenv("USER_SERVICE_ADDR"), viper.GetString("services.user")),
-		RoomServiceAddr:    firstNonEmpty(os.Getenv("ROOM_SERVICE_ADDR"), viper.GetString("services.room")),
-		BookingServiceAddr: firstNonEmpty(os.Getenv("BOOKING_SERVICE_ADDR"), viper.GetString("services.booking")),
-		JWTSecret:          firstNonEmpty(os.Getenv("JWT_SECRET"), viper.GetString("jwt.secret")),
+		HTTPPort:                firstNonEmpty(os.Getenv("HTTP_PORT"), viper.GetString("http.port")),
+		UserServiceAddr:         firstNonEmpty(os.Getenv("USER_SERVICE_ADDR"), viper.GetString("services.user")),
+		RoomServiceAddr:         firstNonEmpty(os.Getenv("ROOM_SERVICE_ADDR"), viper.GetString("services.room")),
+		BookingServiceAddr:      firstNonEmpty(os.Getenv("BOOKING_SERVICE_ADDR"), viper.GetString("services.booking")),
+		NotificationServiceAddr: firstNonEmpty(os.Getenv("NOTIFICATION_SERVICE_ADDR"), viper.GetString("services.notification")),
+		JWTSecret:               firstNonEmpty(os.Getenv("JWT_SECRET"), viper.GetString("jwt.secret")),
 	}
 }
 
