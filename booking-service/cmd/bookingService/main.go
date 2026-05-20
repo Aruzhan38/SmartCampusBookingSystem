@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"booking-service/internal/client"
 	"booking-service/internal/config"
 	"booking-service/internal/domain"
 	"booking-service/internal/messaging"
@@ -33,14 +34,23 @@ func main() {
 	}
 
 	repo := repository.NewBookingRepository(db)
-
 	publisher, err := messaging.NewNATSPublisher(cfg.NATSURL)
 	if err != nil {
 		log.Println("failed to connect to NATS:", err)
 		log.Println("booking service will continue without notification events")
 	}
+	// create user service client
+	var userClientInstance client.UserClient
+	if cfg.UserServiceAddr != "" {
+		userConn, err := client.DialUserService(cfg.UserServiceAddr)
+		if err != nil {
+			log.Println("failed to connect to user service:", err)
+		} else {
+			userClientInstance = client.NewUserClient(userConn)
+		}
+	}
 
-	uc := usecase.NewBookingUsecase(repo, publisher)
+	uc := usecase.NewBookingUsecase(repo, publisher, userClientInstance)
 	server := grpcServer.NewBookingServer(uc)
 
 	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)

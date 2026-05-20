@@ -55,6 +55,7 @@ services:
       DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/booking_db?sslmode=require&search_path=public
       GRPC_PORT: 50053
       NATS_URL: nats://nats:4222
+      USER_SERVICE_ADDR: user-service:50051
     ports:
       - "50053:50053"
     depends_on:

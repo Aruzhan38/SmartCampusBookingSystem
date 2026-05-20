@@ -18,7 +18,8 @@ type Config struct {
 	DBPort     string
 	GRPCPort   string
 
-	NATSURL string
+	NATSURL         string
+	UserServiceAddr string
 }
 
 func Load() *Config {
@@ -62,6 +63,11 @@ func Load() *Config {
 			os.Getenv("NATS_URL"),
 			viper.GetString("nats.url"),
 			"nats://localhost:4222",
+		),
+		UserServiceAddr: firstNonEmpty(
+			os.Getenv("USER_SERVICE_ADDR"),
+			viper.GetString("user.addr"),
+			"localhost:50051",
 		),
 	}
 }

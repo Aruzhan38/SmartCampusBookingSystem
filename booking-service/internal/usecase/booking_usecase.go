@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
+	"booking-service/internal/client"
 	"booking-service/internal/domain"
 	"booking-service/internal/messaging"
 	"booking-service/internal/repository"
@@ -29,14 +31,20 @@ type BookingUsecase interface {
 }
 
 type bookingUsecase struct {
-	repo      repository.BookingRepository
-	publisher messaging.NATSPublisher
+	repo       repository.BookingRepository
+	publisher  messaging.NATSPublisher
+	userClient client.UserClient
 }
 
-func NewBookingUsecase(repo repository.BookingRepository, publisher messaging.NATSPublisher) BookingUsecase {
+func NewBookingUsecase(repo repository.BookingRepository, publisher messaging.NATSPublisher, userClients ...client.UserClient) BookingUsecase {
+	var uc client.UserClient
+	if len(userClients) > 0 {
+		uc = userClients[0]
+	}
 	return &bookingUsecase{
-		repo:      repo,
-		publisher: publisher,
+		repo:       repo,
+		publisher:  publisher,
+		userClient: uc,
 	}
 }
 
@@ -60,10 +68,19 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context, userID, roomID uint,
 	}
 
 	if u.publisher != nil {
+		email := ""
+		if u.userClient != nil {
+			uid := strconv.Itoa(int(booking.UserID))
+			if usr, err := u.userClient.GetUserByID(ctx, uid); err == nil {
+				email = usr.Email
+			}
+		}
+
 		err := u.publisher.PublishBookingCreated(messaging.BookingCreatedEvent{
 			UserID:    booking.UserID,
 			BookingID: booking.ID,
 			RoomID:    booking.RoomID,
+			Email:     email,
 			Message: fmt.Sprintf(
 				"Your booking #%d for room #%d has been created successfully. Time: %s - %s.",
 				booking.ID,
@@ -112,7 +129,42 @@ func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, id uint, statu
 		return nil, err
 	}
 
-	return u.repo.GetByID(ctx, id)
+	booking, err := u.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// publish status change event
+	if u.publisher != nil {
+		email := ""
+		if u.userClient != nil {
+			// try to fetch user email
+			uid := strconv.Itoa(int(booking.UserID))
+			if usr, err := u.userClient.GetUserByID(ctx, uid); err == nil {
+				email = usr.Email
+			}
+		}
+
+		message := "Your booking status has been updated."
+		switch status {
+		case StatusConfirmed:
+			message = "Your booking has been approved by admin."
+		case StatusRejected:
+			message = "Your booking has been rejected by admin."
+		}
+
+		_ = u.publisher.PublishBookingStatusChanged(messaging.BookingStatusChangedEvent{
+			UserID:    booking.UserID,
+			BookingID: booking.ID,
+			RoomID:    booking.RoomID,
+			Email:     email,
+			Message:   message,
+			Status:    status,
+			Type:      "BOOKING_STATUS_CHANGED",
+		})
+	}
+
+	return booking, nil
 }
 
 func isValidStatus(status string) bool {

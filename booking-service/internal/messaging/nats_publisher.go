@@ -15,8 +15,19 @@ type BookingCreatedEvent struct {
 	Type      string `json:"type"`
 }
 
+type BookingStatusChangedEvent struct {
+	UserID    uint   `json:"user_id"`
+	BookingID uint   `json:"booking_id"`
+	RoomID    uint   `json:"room_id"`
+	Email     string `json:"email"`
+	Message   string `json:"message"`
+	Status    string `json:"status"`
+	Type      string `json:"type"`
+}
+
 type NATSPublisher interface {
 	PublishBookingCreated(event BookingCreatedEvent) error
+	PublishBookingStatusChanged(event BookingStatusChangedEvent) error
 }
 
 type natsPublisher struct {
@@ -39,4 +50,13 @@ func (p *natsPublisher) PublishBookingCreated(event BookingCreatedEvent) error {
 	}
 
 	return p.conn.Publish("booking.created", data)
+}
+
+func (p *natsPublisher) PublishBookingStatusChanged(event BookingStatusChangedEvent) error {
+	data, err := json.Marshal(event)
+	if err != nil {
+		return err
+	}
+
+	return p.conn.Publish("booking.status_changed", data)
 }
