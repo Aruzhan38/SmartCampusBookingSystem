@@ -85,6 +85,11 @@
         const user=decodeToken();
         if(!token||!user){showMessage('Please login first. Redirecting to login...','info');setTimeout(()=>{window.location.href='/login'},1200)}
         else if(String(user.role||'').toUpperCase()!=='ADMIN'){showMessage('Admin access only. Redirecting to rooms...','error');setTimeout(()=>{window.location.href='/rooms-ui'},1200)}
+        document.querySelectorAll('a[href="/bookings-ui"]').forEach(el => {
+            const h3 = el.querySelector && el.querySelector('h3');
+            if (h3) h3.textContent = 'All Bookings';
+            else el.textContent = '▣ All Bookings';
+        });
         document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem('sc_token');window.location.href='/login'})
         document.getElementById('createRoomForm').addEventListener('submit',async(event)=>{event.preventDefault();clearMessage();const body={room_number:document.getElementById('create_room_number').value.trim(),capacity:Number(document.getElementById('create_capacity').value),building_id:document.getElementById('create_building_id').value.trim(),description:document.getElementById('create_description').value.trim()};try{const res=await fetch('/rooms',{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});await parseResponse(res);showMessage('Room created successfully.','success');event.target.reset()}catch(error){showMessage(error.message,'error')}})
         document.getElementById('updateRoomForm').addEventListener('submit',async(event)=>{event.preventDefault();clearMessage();const id=document.getElementById('update_room_id').value;const body={room_number:document.getElementById('update_room_number').value.trim(),capacity:Number(document.getElementById('update_capacity').value),building_id:document.getElementById('update_building_id').value.trim(),description:document.getElementById('update_description').value.trim()};try{const res=await fetch('/rooms/'+encodeURIComponent(id),{method:'PUT',headers:authHeaders(),body:JSON.stringify(body)});await parseResponse(res);showMessage('Room updated successfully.','success');event.target.reset()}catch(error){showMessage(error.message,'error')}})

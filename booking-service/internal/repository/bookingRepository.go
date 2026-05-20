@@ -15,6 +15,7 @@ type BookingRepository interface {
 	CreateWithConflictCheck(ctx context.Context, booking *domain.Booking) error
 	GetByID(ctx context.Context, id uint) (*domain.Booking, error)
 	ListByUserID(ctx context.Context, userID uint) ([]domain.Booking, error)
+	ListAll(ctx context.Context) ([]domain.Booking, error)
 	Cancel(ctx context.Context, id uint, userID uint) error
 	UpdateStatus(ctx context.Context, id uint, status string) error
 	HasConflict(ctx context.Context, roomID uint, startTime time.Time, endTime time.Time) (bool, error)
@@ -113,4 +114,12 @@ func (r *bookingRepository) HasConflict(ctx context.Context, roomID uint, startT
 		Where("room_id = ? AND status <> ? AND start_time < ? AND end_time > ?", roomID, "Cancelled", endTime, startTime).
 		Count(&count).Error
 	return count > 0, err
+}
+
+func (r *bookingRepository) ListAll(ctx context.Context) ([]domain.Booking, error) {
+	var bookings []domain.Booking
+	err := r.db.WithContext(ctx).
+		Order("start_time desc").
+		Find(&bookings).Error
+	return bookings, err
 }

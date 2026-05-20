@@ -70,7 +70,12 @@
         .nav a:hover, .logout:hover { background: #edf5ff; color: var(--text); }
         .nav a.active { background: #e4effc; color: var(--text); outline: 2px solid #111827; }
         .logout { margin-top: auto; color: var(--danger); }
-        .admin-only { display: none; }
+        .admin-only, .private-link { display: none; }
+        .auth-links, .user-card { margin-top: auto; display: grid; gap: 10px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; }
+        .user-card{display:none;padding:16px;border-radius:18px;background:#f4f9ff;border:1px solid var(--line)}
+        .user-card strong{display:block}
+        .user-card span{color:var(--muted);font-weight:750;font-size:.9rem}
         .main { min-width: 0; }
         .topbar {
             height: 72px;
@@ -132,7 +137,7 @@
             transition: transform 0.18s ease, box-shadow 0.18s ease;
         }
         .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
-        .btn-primary { color: white; background: linear-gradient(135deg, var(--blue), var(--teal)); }
+        .btn-primary, .btn.primary { color: white; background: linear-gradient(135deg, var(--blue), var(--teal)); }
         .btn-soft { color: #1d4ed8; background: #e8f2ff; }
         .btn:disabled { opacity: 0.65; cursor: wait; transform: none; }
         .layout { display: block; }
@@ -182,11 +187,19 @@
             <nav class="nav">
                 <a href="/">▦ Dashboard</a>
                 <a class="active" href="/rooms-ui">▥ Rooms</a>
-                <a href="/bookings-ui">▣ My Bookings</a>
-                <a href="/profile-ui">♙ Profile</a>
+                <a class="private-link" href="/bookings-ui">▣ My Bookings</a>
+                <a class="private-link" href="/profile-ui">♙ Profile</a>
                 <a class="admin-only" href="/admin-ui">◇ Admin</a>
             </nav>
-            <button id="logoutBtn" class="logout" type="button">↪ Logout</button>
+            <div id="authLinks" class="auth-links">
+                <a class="btn primary" href="/login">Login</a>
+                <a class="btn" href="/register">Register</a>
+            </div>
+            <div id="userCard" class="user-card">
+                <strong id="sideName">User</strong>
+                <span id="sideRole">Role</span>
+                <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
+            </div>
         </aside>
 
         <main class="main">
@@ -249,6 +262,7 @@
 
     <script>
         const token = localStorage.getItem('sc_token');
+        const user = decodeToken();
         const message = document.getElementById('message');
         const roomsGrid = document.getElementById('roomsGrid');
         const modal = document.getElementById('bookingModal');
@@ -257,9 +271,14 @@
         let selectedEnd = '';
 
         function decodeToken(){if(!token)return null;try{const base64=token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(decodeURIComponent(escape(atob(base64))))}catch(e){return null}}
+        function displayName(user){return localStorage.getItem('sc_full_name')|| (user && user.email ? user.email.split('@')[0] : 'User')}
         function showMessage(text, type) { message.textContent = text; message.className = 'alert ' + type; }
         function clearMessage() { message.className = 'alert'; message.textContent = ''; }
-        function authHeaders() { return { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('sc_token') }; }
+        function authHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) { headers.Authorization = 'Bearer ' + token; }
+            return headers;
+        }
         function setLoading(button, loading, text) {
             if (!button) return;
             if (loading) { button.dataset.originalText = button.textContent; button.textContent = text || 'Loading...'; button.disabled = true; return; }
@@ -293,6 +312,11 @@
                     <button class="btn btn-primary" type="button" data-room-id="${id}">Book Now</button>
                 `;
                 card.querySelector('button').addEventListener('click', () => {
+                    if (!user) {
+                        showMessage('Login or register to book rooms.', 'info');
+                        setTimeout(() => { window.location.href = '/login'; }, 1200);
+                        return;
+                    }
                     openBookingModal({ id, number, capacity, building });
                 });
                 roomsGrid.appendChild(card);
@@ -304,6 +328,8 @@
             try {
                 const res = await fetch('/rooms', { headers: authHeaders() });
                 renderRooms(await parseResponse(res));
+            } catch (error) {
+                showMessage(error.message, 'error');
             } finally { setLoading(button, false); }
         }
         function toISOStringFromDateTime(date, time) { return new Date(date + 'T' + time + ':00').toISOString(); }
@@ -325,7 +351,12 @@
         }
         function openBookingModal(room) {
             const user = decodeToken();
-            document.getElementById('create_user_id').value = user ? user.user_id : '';
+            if (!user) {
+                showMessage('Please login to book a room.', 'info');
+                setTimeout(() => { window.location.href = '/login'; }, 600);
+                return;
+            }
+            document.getElementById('create_user_id').value = user.user_id;
             document.getElementById('create_room_id').value = room.id;
             document.getElementById('modalRoomTitle').textContent = room.number;
             document.getElementById('modalRoomMeta').textContent = room.capacity + ' people · Building ' + room.building;
@@ -338,17 +369,38 @@
         }
         function closeBookingModal() { modal.classList.remove('open'); }
 
-        if (!token) {
-            showMessage('Please login first. Redirecting to login...', 'info');
-            setTimeout(() => { window.location.href = '/login'; }, 1200);
-        } else {
+        const authLinks = document.getElementById('authLinks');
+        const userCard = document.getElementById('userCard');
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (user) {
+            authLinks.style.display = 'none';
+            userCard.style.display = 'grid';
+            document.getElementById('sideName').textContent = displayName(user);
+            document.getElementById('sideRole').textContent = String(user.role||'Student');
+            document.querySelectorAll('.private-link').forEach((el) => el.style.display = 'flex');
+            if (String(user.role||'').toUpperCase()==='ADMIN') {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+                document.querySelectorAll('a[href="/bookings-ui"]').forEach(el => {
+                    const h3 = el.querySelector && el.querySelector('h3');
+                    if (h3) h3.textContent = 'All Bookings';
+                    else el.textContent = '▣ All Bookings';
+                });
+            } else {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            }
             const today = new Date().toISOString().slice(0, 10);
             document.getElementById('booking_date').value = today;
             loadRooms().catch((error) => showMessage(error.message, 'error'));
+        } else {
+            authLinks.style.display = 'grid';
+            userCard.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            document.querySelectorAll('.private-link').forEach((el) => el.style.display = 'none');
+            document.querySelectorAll('.admin-only').forEach((el) => el.style.display = 'none');
+            loadRooms().catch((error) => showMessage(error.message, 'error'));
+            showMessage('Rooms page is available for all. Login to book rooms.', 'info');
         }
-        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('sc_token'); localStorage.removeItem('sc_user'); window.location.href = '/login'; });
-        const user = decodeToken();
-        if(user && String(user.role||'').toUpperCase()==='ADMIN'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex')}
+        if (logoutBtn) { logoutBtn.addEventListener('click', () => { localStorage.removeItem('sc_token'); localStorage.removeItem('sc_user'); window.location.href = '/login'; }); }
         document.getElementById('closeModalBtn').addEventListener('click', closeBookingModal);
         modal.addEventListener('click', (event) => { if (event.target === modal) closeBookingModal(); });
         document.getElementById('resetSearchBtn').addEventListener('click', (event) => {

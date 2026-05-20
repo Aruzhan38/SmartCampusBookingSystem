@@ -3,6 +3,7 @@ package http
 import (
 	"api-gateway/internal/client"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +36,11 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	if err := h.userClient.RegisterUser(c.Request.Context(), req.FullName, req.Email, req.Password, req.Role); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		errMsg := "Registration failed"
+		if strings.Contains(strings.ToLower(err.Error()), "user already exists") {
+			errMsg = "User already exists"
+		}
+		c.JSON(http.StatusBadRequest, gin.H{"error": errMsg})
 		return
 	}
 
@@ -51,9 +56,29 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	token, err := h.userClient.LoginUser(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		errMsg := "Invalid credentials"
+		if !strings.Contains(strings.ToLower(err.Error()), "invalid credentials") {
+			errMsg = err.Error()
+		}
+		c.JSON(http.StatusUnauthorized, gin.H{"error": errMsg})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (h *UserHandler) GetUserByID(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user id is required"})
+		return
+	}
+
+	user, err := h.userClient.GetUserByID(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"user": user})
 }

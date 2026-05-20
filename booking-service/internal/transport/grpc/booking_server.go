@@ -74,9 +74,9 @@ func (s *BookingServer) GetBookingById(ctx context.Context, req *bookingpb.GetBo
 }
 
 func (s *BookingServer) ListUserBookings(ctx context.Context, req *bookingpb.ListUserBookingsRequest) (*bookingpb.ListBookingsResponse, error) {
-	userID, err := parsePositiveUint(req.UserId)
+	userID, err := parseNonNegativeUint(req.UserId)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "user_id must be a positive integer")
+		return nil, status.Error(codes.InvalidArgument, "user_id must be a non-negative integer")
 	}
 
 	bookings, err := s.usecase.ListUserBookings(ctx, uint(userID))
@@ -102,9 +102,9 @@ func (s *BookingServer) CancelBooking(ctx context.Context, req *bookingpb.Cancel
 		return nil, status.Error(codes.InvalidArgument, "booking_id must be a positive integer")
 	}
 
-	userID, err := parsePositiveUint(req.UserId)
+	userID, err := parseNonNegativeUint(req.UserId)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "user_id must be a positive integer")
+		return nil, status.Error(codes.InvalidArgument, "user_id must be a non-negative integer")
 	}
 
 	booking, err := s.usecase.CancelBooking(ctx, uint(bookingID), uint(userID))
@@ -160,6 +160,17 @@ func parsePositiveUint(value string) (uint64, error) {
 	parsed, err := strconv.ParseUint(value, 10, 64)
 	if err != nil || parsed == 0 {
 		return 0, strconv.ErrSyntax
+	}
+	return parsed, nil
+}
+
+func parseNonNegativeUint(value string) (uint64, error) {
+	if value == "" {
+		return 0, nil
+	}
+	parsed, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		return 0, err
 	}
 	return parsed, nil
 }

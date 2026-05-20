@@ -4,6 +4,7 @@ import (
 	"api-gateway/internal/domain"
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 
 	pb "github.com/Aruzhan38/smart-campus-generated/proto/user"
@@ -15,6 +16,7 @@ type UserClient interface {
 	ValidateToken(ctx context.Context, token string) (*domain.User, error)
 	LoginUser(ctx context.Context, email, password string) (string, error)
 	RegisterUser(ctx context.Context, fullName, email, password, role string) error
+	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 }
 
 type userClient struct {
@@ -27,6 +29,7 @@ func NewUserClient(conn *grpc.ClientConn) UserClient {
 
 func (uc *userClient) ValidateToken(ctx context.Context, token string) (*domain.User, error) {
 	resp, err := uc.client.ValidateToken(ctx, &pb.ValidateTokenRequest{Token: token})
+	log.Printf("userClient.ValidateToken resp=%v err=%v", resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -56,6 +59,23 @@ func (uc *userClient) LoginUser(ctx context.Context, email, password string) (st
 		return "", err
 	}
 	return resp.Token, nil
+}
+
+func (uc *userClient) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
+	resp, err := uc.client.GetUserById(ctx, &pb.GetUserByIdRequest{UserId: id})
+	if err != nil {
+		return nil, err
+	}
+	userID, err := strconv.Atoi(resp.User.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &domain.User{
+		ID:       userID,
+		FullName: resp.User.FullName,
+		Email:    resp.User.Email,
+		Role:     resp.User.Role,
+	}, nil
 }
 
 func (uc *userClient) RegisterUser(ctx context.Context, fullName, email, password, role string) error {

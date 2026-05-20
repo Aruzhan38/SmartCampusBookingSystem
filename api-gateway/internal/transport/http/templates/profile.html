@@ -61,7 +61,16 @@
         document.getElementById('sideName').textContent=name; document.getElementById('sideRole').textContent=role;
         document.getElementById('profileName').textContent=name; document.getElementById('profileSubtitle').textContent=role+' account';
         document.getElementById('profileID').textContent=user.user_id||'-'; document.getElementById('profileEmail').textContent=user.email||'-'; document.getElementById('profileRole').textContent=role; document.getElementById('avatar').textContent=initials;
-        if(role.toUpperCase()==='ADMIN'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex')}
+        if(role.toUpperCase()==='ADMIN'){
+            document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex');
+                    document.querySelectorAll('a[href="/bookings-ui"]').forEach(el => {
+                        const h3 = el.querySelector && el.querySelector('h3');
+                        if (h3) h3.textContent = 'All Bookings';
+                        else el.textContent = '▣ All Bookings';
+                    });
+        } else {
+            document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+        }
         document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem('sc_token');localStorage.removeItem('sc_user');window.location.href='/login'})
     </script>
 </body>

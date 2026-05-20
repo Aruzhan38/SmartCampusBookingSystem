@@ -26,11 +26,11 @@
         <aside class="sidebar">
             <a class="brand" href="/"><span class="brand-icon">SC</span><span>Smart Campus</span></a>
             <nav class="nav">
-                <a class="active" href="/">Dashboard</a>
-                <a href="/rooms-ui">Rooms</a>
-                <a href="/bookings-ui">My Bookings</a>
-                <a class="admin-only" href="/admin-ui">Admin</a>
-                <a class="private-link" href="/profile-ui">Profile</a>
+                <a class="active" href="/">▦ Dashboard</a>
+                <a href="/rooms-ui">▥ Rooms</a>
+                <a class="private-link" href="/bookings-ui">▣ My Bookings</a>
+                <a class="private-link" href="/profile-ui">♙ Profile</a>
+                <a class="admin-only" href="/admin-ui">◇ Admin</a>
             </nav>
             <div id="authLinks" class="auth-links">
                 <a class="btn primary" href="/login">Login</a>
@@ -39,8 +39,7 @@
             <div id="userCard" class="user-card">
                 <strong id="sideName">User</strong>
                 <span id="sideRole">Role</span>
-                <a class="btn" href="/profile-ui">Profile</a>
-                <button id="logoutBtn" class="btn" type="button">Logout</button>
+                <button id="logoutBtn" class="btn btn-danger" type="button">Logout</button>
             </div>
         </aside>
         <main class="main">
@@ -105,11 +104,26 @@
             }catch(error){document.getElementById('weekSummary').className='empty';document.getElementById('weekSummary').textContent=error.message}
         }
         const user=decodeToken();
+        const authLinks=document.getElementById('authLinks');
+        const userCard=document.getElementById('userCard');
         if(user){
             const role=String(user.role||'Student'); const name=displayName(user);
-            document.getElementById('authLinks').style.display='none'; document.getElementById('userCard').style.display='grid';
+            authLinks.style.display='none'; userCard.style.display='grid';
             document.getElementById('sideName').textContent=name; document.getElementById('sideRole').textContent=role; document.getElementById('welcomeTitle').textContent='Hello, '+name;
-            if(role.toUpperCase()==='ADMIN'){document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex')}
+            if(role.toUpperCase()==='ADMIN'){
+                document.querySelectorAll('.admin-only').forEach(el=>el.style.display='flex');
+                document.querySelectorAll('a[href="/bookings-ui"]').forEach(el => {
+                    const h3 = el.querySelector && el.querySelector('h3');
+                    if (h3) h3.textContent = 'All Bookings';
+                    else el.textContent = '▣ All Bookings';
+                });
+            } else {
+                document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+            }
+        } else {
+            authLinks.style.display='grid'; userCard.style.display='none';
+            document.querySelectorAll('.private-link').forEach(el=>el.style.display='none');
+            document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
         }
         document.querySelectorAll('.private-link').forEach(link=>link.addEventListener('click',(event)=>{if(!decodeToken()){event.preventDefault();window.location.href='/login'}}));
         const logoutBtn=document.getElementById('logoutBtn'); if(logoutBtn){logoutBtn.addEventListener('click',()=>{localStorage.removeItem('sc_token');localStorage.removeItem('sc_user');window.location.href='/login'})}

@@ -7,8 +7,9 @@ import (
 	"api-gateway/internal/middleware"
 
 	gatewayhttp "api-gateway/internal/transport/http"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
@@ -61,12 +62,12 @@ func main() {
 
 	r.POST("/api/register", userHandler.Register)
 	r.POST("/api/login", userHandler.Login)
+	r.GET("/rooms", roomHandler.GetRooms)
+	r.GET("/rooms/search", roomHandler.SearchRoomsByCapacity)
 
 	protected := r.Group("/")
 	protected.Use(middleware.JWTAuthMiddleware(userClient))
-	protected.GET("/rooms", roomHandler.GetRooms)
 	protected.POST("/rooms", roomHandler.CreateRoom)
-	protected.GET("/rooms/search", roomHandler.SearchRoomsByCapacity)
 	protected.GET("/rooms/:id", roomHandler.GetRoomByID)
 	protected.PUT("/rooms/:id", roomHandler.UpdateRoom)
 	protected.POST("/bookings", bookingHandler.CreateBooking)
@@ -74,6 +75,7 @@ func main() {
 	protected.GET("/bookings/:id", bookingHandler.GetBookingByID)
 	protected.DELETE("/bookings/:id", bookingHandler.CancelBooking)
 	protected.PATCH("/bookings/:id/status", bookingHandler.UpdateBookingStatus)
+	protected.GET("/users/:id", userHandler.GetUserByID)
 
 	log.Println("API Gateway listening on :" + cfg.HTTPPort)
 	if err := r.Run(":" + cfg.HTTPPort); err != nil {

@@ -2,9 +2,11 @@ package http
 
 import (
 	"api-gateway/internal/client"
+	"api-gateway/internal/domain"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +23,6 @@ func NewBookingHandler(bookingClient client.BookingClient) *BookingHandler {
 }
 
 type createBookingRequest struct {
-	UserID    uint   `json:"user_id" binding:"required,min=1"`
 	RoomID    uint   `json:"room_id" binding:"required,min=1"`
 	StartTime string `json:"start_time" binding:"required"`
 	EndTime   string `json:"end_time" binding:"required"`
@@ -41,7 +42,17 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		return
 	}
 
-	// TODO: extract user_id from JWT claims instead of trusting the request body.
+	// extract user_id from JWT claims
+	authUserVal, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	authUser, ok := authUserVal.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	if err := validateRFC3339(req.StartTime, "start_time"); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
@@ -57,7 +68,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 
 	resp, err := h.bookingClient.CreateBooking(
 		c.Request.Context(),
-		req.UserID,
+		uint(authUser.ID),
 		req.RoomID,
 		req.StartTime,
 		req.EndTime,
@@ -94,13 +105,42 @@ func (h *BookingHandler) GetBookingByID(c *gin.Context) {
 }
 
 func (h *BookingHandler) ListUserBookings(c *gin.Context) {
-	userIDParam := c.Query("user_id")
-	userID, err := parsePositiveUintParam(userIDParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "user_id query parameter must be a positive integer",
-		})
+	authUserVal, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
+	}
+	authUser, ok := authUserVal.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	userIDParam := c.Query("user_id")
+	var userID uint64
+	var err error
+	if userIDParam == "" {
+		if strings.ToUpper(authUser.Role) == "ADMIN" {
+			userID = 0
+		} else {
+			userID = uint64(authUser.ID)
+		}
+	} else {
+		userID, err = parseNonNegativeUintParam(userIDParam)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "user_id query parameter must be a non-negative integer",
+			})
+			return
+		}
+		if userID == 0 && strings.ToUpper(authUser.Role) != "ADMIN" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
+		if userID > 0 && uint(userID) != uint(authUser.ID) && strings.ToUpper(authUser.Role) != "ADMIN" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
 	}
 
 	resp, err := h.bookingClient.ListUserBookings(c.Request.Context(), uint(userID))
@@ -123,13 +163,42 @@ func (h *BookingHandler) CancelBooking(c *gin.Context) {
 		return
 	}
 
-	userIDParam := c.Query("user_id")
-	userID, err := parsePositiveUintParam(userIDParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "user_id query parameter must be a positive integer",
-		})
+	authUserVal, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
+	}
+	authUser, ok := authUserVal.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	userIDParam := c.Query("user_id")
+	var userID uint64
+	var err error
+	if userIDParam == "" {
+		if strings.ToUpper(authUser.Role) == "ADMIN" {
+			userID = 0
+		} else {
+			userID = uint64(authUser.ID)
+		}
+	} else {
+		userID, err = parseNonNegativeUintParam(userIDParam)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "user_id query parameter must be a non-negative integer",
+			})
+			return
+		}
+		if userID == 0 && strings.ToUpper(authUser.Role) != "ADMIN" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
+		if userID > 0 && uint(userID) != uint(authUser.ID) && strings.ToUpper(authUser.Role) != "ADMIN" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+			return
+		}
 	}
 
 	resp, err := h.bookingClient.CancelBooking(c.Request.Context(), id, uint(userID))
@@ -160,6 +229,22 @@ func (h *BookingHandler) UpdateBookingStatus(c *gin.Context) {
 		return
 	}
 
+	// only admins can update booking status
+	authUserVal, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	authUser, ok := authUserVal.(*domain.User)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if strings.ToUpper(authUser.Role) != "ADMIN" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
+
 	resp, err := h.bookingClient.UpdateBookingStatus(c.Request.Context(), id, req.Status)
 	if err != nil {
 		c.JSON(bookingErrorStatus(err), gin.H{
@@ -182,6 +267,17 @@ func parsePositiveUintParam(value string) (uint64, error) {
 	parsed, err := strconv.ParseUint(value, 10, 64)
 	if err != nil || parsed == 0 {
 		return 0, strconv.ErrSyntax
+	}
+	return parsed, nil
+}
+
+func parseNonNegativeUintParam(value string) (uint64, error) {
+	if value == "" {
+		return 0, nil
+	}
+	parsed, err := strconv.ParseUint(value, 10, 64)
+	if err != nil {
+		return 0, err
 	}
 	return parsed, nil
 }

@@ -41,13 +41,23 @@ func Load() *Config {
 	)
 
 	if dbURL == "" {
+		// Default to disabling SSL for local postgres service (docker-compose)
+		sslmode := "require"
+		channelBinding := " channel_binding=require"
+		host := viper.GetString("db.host")
+		if host == "postgres" || host == "localhost" || host == "127.0.0.1" {
+			sslmode = "disable"
+			channelBinding = ""
+		}
 		dbURL = fmt.Sprintf(
-			"host=%s user=%s password=%s dbname=%s port=%s sslmode=require channel_binding=require",
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s%s",
 			viper.GetString("db.host"),
 			viper.GetString("db.user"),
 			viper.GetString("db.password"),
 			viper.GetString("db.name"),
 			viper.GetString("db.port"),
+			sslmode,
+			channelBinding,
 		)
 	}
 
@@ -59,7 +69,7 @@ func Load() *Config {
 		DBPassword:  viper.GetString("db.password"),
 		DBName:      viper.GetString("db.name"),
 		DBPort:      viper.GetString("db.port"),
-		JWTSecret:   viper.GetString("jwt.secret"),
+		JWTSecret:   firstNonEmpty(os.Getenv("JWT_SECRET"), viper.GetString("jwt.secret")),
 		GRPCPort:    viper.GetString("grpc.port"),
 	}
 }

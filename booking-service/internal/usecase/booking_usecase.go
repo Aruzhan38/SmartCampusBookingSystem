@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	StatusPending   = "PENDING"
 	StatusConfirmed = "CONFIRMED"
 	StatusCancelled = "CANCELLED"
 	StatusRejected  = "REJECTED"
@@ -50,7 +51,7 @@ func (u *bookingUsecase) CreateBooking(ctx context.Context, userID, roomID uint,
 		StartTime: startTime,
 		EndTime:   endTime,
 		Purpose:   purpose,
-		Status:    StatusConfirmed,
+		Status:    StatusPending,
 		CreatedAt: time.Now().UTC(),
 	}
 
@@ -86,6 +87,9 @@ func (u *bookingUsecase) GetBookingByID(ctx context.Context, id uint) (*domain.B
 }
 
 func (u *bookingUsecase) ListUserBookings(ctx context.Context, userID uint) ([]domain.Booking, error) {
+	if userID == 0 {
+		return u.repo.ListAll(ctx)
+	}
 	return u.repo.ListByUserID(ctx, userID)
 }
 
@@ -113,6 +117,8 @@ func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, id uint, statu
 
 func isValidStatus(status string) bool {
 	switch status {
+	case StatusPending:
+		return true
 	case StatusConfirmed, StatusCancelled, StatusRejected:
 		return true
 	default:
