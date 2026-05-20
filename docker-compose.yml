@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: smartcampus
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d smartcampus"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats:
+    image: nats:latest
+    ports:
+      - "4222:4222"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  user-service:
+    build: ./user-service
+    environment:
+      DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/user_db?sslmode=require&search_path=public
+      JWT_SECRET: your-secret-key
+      GRPC_PORT: 50051
+    ports:
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  room-service:
+    build: ./room-service
+    environment:
+      DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/room_db?sslmode=require&search_path=public
+      GRPC_PORT: 50052
+      REDIS_ADDR: redis:6379
+    ports:
+      - "50052:50052"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  booking-service:
+    build: ./booking-service
+    environment:
+      DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/booking_db?sslmode=require&search_path=public
+      GRPC_PORT: 50053
+      NATS_URL: nats://nats:4222
+    ports:
+      - "50053:50053"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  notification-service:
+    build: ./notification-service
+    environment:
+      DB_URL: postgres://postgres.eojtvcochbgujtpgsmdk:QlKJ9cfqxNH7llUQ@aws-1-ap-south-1.pooler.supabase.com:6543/notification_db?sslmode=require&search_path=public
+      GRPC_PORT: 50054
+      NATS_URL: nats://nats:4222
+
+      SMTP_HOST: smtp.mailersend.net
+      SMTP_PORT: 587
+      SMTP_USERNAME: MS_hQHPH2@test-z0vklo65xy7l7qrx.mlsender.net
+      SMTP_PASSWORD: mssp.Ds3Kdl3.neqvygm877840p7w.lVAR6Sp
+      SMTP_FROM: no-reply@test-z0vklo65xy7l7qrx.mlsender.net
+      DEFAULT_EMAIL_TO: aruzantoktarbekova1@gmail.com
+    ports:
+      - "50054:50054"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+
+  api-gateway:
+    build: ./api-gateway
+    environment:
+      HTTP_PORT: 8080
+      USER_SERVICE_ADDR: user-service:50051
+      ROOM_SERVICE_ADDR: room-service:50052
+      BOOKING_SERVICE_ADDR: booking-service:50053
+      NOTIFICATION_SERVICE_ADDR: notification-service:50054
+      JWT_SECRET: your-secret-key
+    ports:
+      - "8080:8080"
+    depends_on:
+      user-service:
+        condition: service_started
+      room-service:
+        condition: service_started
+      booking-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      api-gateway:
+        condition: service_started
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_started
+
+volumes:
+  postgres_data:
