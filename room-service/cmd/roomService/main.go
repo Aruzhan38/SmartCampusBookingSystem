@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 
+	"room-service/internal/cache"
 	"room-service/internal/config"
 	"room-service/internal/domain"
 	"room-service/internal/repository"
@@ -33,7 +34,9 @@ func main() {
 	}
 
 	repo := repository.NewRoomRepository(db)
-	uc := usecase.NewRoomUsecase(repo)
+	roomCache := cache.NewRedisRoomCache(cfg.RedisAddr)
+	uc := usecase.NewRoomUsecase(repo, roomCache)
+	log.Println("Room Service connected to Redis:", cfg.RedisAddr)
 	server := grpcServer.NewRoomServer(uc)
 
 	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)

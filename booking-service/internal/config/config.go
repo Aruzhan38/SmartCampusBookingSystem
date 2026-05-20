@@ -17,6 +17,8 @@ type Config struct {
 	DBName     string
 	DBPort     string
 	GRPCPort   string
+
+	NATSURL string
 }
 
 func Load() *Config {
@@ -55,6 +57,12 @@ func Load() *Config {
 		DBName:     firstNonEmpty(os.Getenv("DB_NAME"), viper.GetString("db.name")),
 		DBPort:     firstNonEmpty(os.Getenv("DB_PORT"), viper.GetString("db.port")),
 		GRPCPort:   firstNonEmpty(os.Getenv("GRPC_PORT"), viper.GetString("grpc.port"), "50053"),
+
+		NATSURL: firstNonEmpty(
+			os.Getenv("NATS_URL"),
+			viper.GetString("nats.url"),
+			"nats://localhost:4222",
+		),
 	}
 }
 

@@ -17,6 +17,7 @@ type Config struct {
 	DBName     string
 	DBPort     string
 	GRPCPort   string
+	RedisAddr  string
 }
 
 func Load() *Config {
@@ -50,6 +51,11 @@ func Load() *Config {
 	return &Config{
 		DBURL:    dbURL,
 		GRPCPort: firstNonEmpty(os.Getenv("GRPC_PORT"), viper.GetString("grpc.port"), "50052"),
+		RedisAddr: firstNonEmpty(
+			os.Getenv("REDIS_ADDR"),
+			viper.GetString("redis.addr"),
+			"localhost:6379",
+		),
 	}
 }
 

@@ -17,6 +17,14 @@ type Config struct {
 	DBName     string
 	DBPort     string
 	GRPCPort   string
+
+	NATSURL      string
+	SMTPHost     string
+	SMTPPort     string
+	SMTPUsername string
+	SMTPPassword string
+	SMTPFrom     string
+	DefaultEmail string
 }
 
 func Load() *Config {
@@ -36,6 +44,14 @@ func Load() *Config {
 		DBName:     getEnv("DB_NAME", "notifications"),
 		DBPort:     getEnv("DB_PORT", "5432"),
 		GRPCPort:   getEnv("GRPC_PORT", "50054"),
+
+		NATSURL:      getEnv("NATS_URL", "nats://localhost:4222"),
+		SMTPHost:     getEnv("SMTP_HOST", "smtp.gmail.com"),
+		SMTPPort:     getEnv("SMTP_PORT", "587"),
+		SMTPUsername: getEnv("SMTP_USERNAME", ""),
+		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
+		SMTPFrom:     getEnv("SMTP_FROM", ""),
+		DefaultEmail: getEnv("DEFAULT_EMAIL_TO", ""),
 	}
 
 	if cfg.DBURL == "" {

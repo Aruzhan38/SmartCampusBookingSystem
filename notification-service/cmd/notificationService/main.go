@@ -6,6 +6,8 @@ import (
 
 	"notification-service/internal/config"
 	"notification-service/internal/domain"
+	"notification-service/internal/mail"
+	"notification-service/internal/messaging"
 	"notification-service/internal/repository"
 	grpcServer "notification-service/internal/transport/grpc"
 	"notification-service/internal/usecase"
@@ -35,16 +37,39 @@ func main() {
 	uc := usecase.NewNotificationUsecase(repo)
 	server := grpcServer.NewNotificationServer(uc)
 
+	mailSender := mail.NewSMTPSender(
+		cfg.SMTPHost,
+		cfg.SMTPPort,
+		cfg.SMTPUsername,
+		cfg.SMTPPassword,
+		cfg.SMTPFrom,
+	)
+
+	consumer := messaging.NewNATSConsumer(
+		cfg.NATSURL,
+		uc,
+		mailSender,
+		cfg.DefaultEmail,
+	)
+
+	go func() {
+		if err := consumer.Start(); err != nil {
+			log.Println("failed to start NATS consumer:", err)
+		}
+	}()
+
 	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to listen: ", err)
 	}
 
 	s := grpc.NewServer()
 	notificationpb.RegisterNotificationServiceServer(s, server)
 
 	log.Println("Notification Service listening on :" + cfg.GRPCPort)
+	log.Println("Notification Service connected to NATS:", cfg.NATSURL)
+
 	if err := s.Serve(lis); err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to serve grpc: ", err)
 	}
 }

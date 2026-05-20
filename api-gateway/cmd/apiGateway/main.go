@@ -3,8 +3,11 @@ package main
 import (
 	"api-gateway/internal/client"
 	"api-gateway/internal/config"
+	"api-gateway/internal/metrics"
 	"api-gateway/internal/middleware"
+
 	gatewayhttp "api-gateway/internal/transport/http"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -37,6 +40,9 @@ func main() {
 	bookingClient := client.NewBookingClient(bookingConn)
 	// HTTP Server
 	r := gin.Default()
+	r.Use(metrics.PrometheusMiddleware())
+
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	webHandler := gatewayhttp.NewWebHandler()
 	r.SetHTMLTemplate(webHandler.Templates())

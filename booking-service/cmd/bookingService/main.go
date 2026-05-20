@@ -6,6 +6,7 @@ import (
 
 	"booking-service/internal/config"
 	"booking-service/internal/domain"
+	"booking-service/internal/messaging"
 	"booking-service/internal/repository"
 	grpcServer "booking-service/internal/transport/grpc"
 	"booking-service/internal/usecase"
@@ -32,19 +33,28 @@ func main() {
 	}
 
 	repo := repository.NewBookingRepository(db)
-	uc := usecase.NewBookingUsecase(repo)
+
+	publisher, err := messaging.NewNATSPublisher(cfg.NATSURL)
+	if err != nil {
+		log.Println("failed to connect to NATS:", err)
+		log.Println("booking service will continue without notification events")
+	}
+
+	uc := usecase.NewBookingUsecase(repo, publisher)
 	server := grpcServer.NewBookingServer(uc)
 
 	lis, err := net.Listen("tcp", ":"+cfg.GRPCPort)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to listen: ", err)
 	}
 
 	s := grpc.NewServer()
 	bookingpb.RegisterBookingServiceServer(s, server)
 
 	log.Println("Booking Service listening on :" + cfg.GRPCPort)
+	log.Println("Booking Service NATS URL:", cfg.NATSURL)
+
 	if err := s.Serve(lis); err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to serve grpc: ", err)
 	}
 }
