@@ -25,7 +25,6 @@ func Load() *Config {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	if err := viper.ReadInConfig(); err != nil {
-		// No config file is fine when using environment variables.
 	}
 
 	return &Config{

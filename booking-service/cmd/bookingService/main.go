@@ -39,7 +39,6 @@ func main() {
 		log.Println("failed to connect to NATS:", err)
 		log.Println("booking service will continue without notification events")
 	}
-	// create user service client
 	var userClientInstance client.UserClient
 	if cfg.UserServiceAddr != "" {
 		userConn, err := client.DialUserService(cfg.UserServiceAddr)

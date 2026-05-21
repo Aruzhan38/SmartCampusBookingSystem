@@ -36,7 +36,7 @@ func (uc *userClient) ValidateToken(ctx context.Context, token string) (*domain.
 	if !resp.Valid {
 		return nil, fmt.Errorf(resp.Message)
 	}
-	// Get full user info
+
 	userResp, err := uc.client.GetUserById(ctx, &pb.GetUserByIdRequest{UserId: resp.UserId})
 	if err != nil {
 		return nil, err

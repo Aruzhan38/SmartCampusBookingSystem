@@ -71,11 +71,61 @@
         .nav a.active { background: #e4effc; color: var(--text); outline: 2px solid #111827; }
         .logout { margin-top: auto; color: var(--danger); }
         .admin-only, .private-link { display: none; }
-        .auth-links, .user-card { margin-top: auto; display: grid; gap: 10px; }
-        .btn { display: inline-flex; align-items: center; justify-content: center; }
-        .user-card{display:none;padding:16px;border-radius:18px;background:#f4f9ff;border:1px solid var(--line)}
-        .user-card strong{display:block}
-        .user-card span{color:var(--muted);font-weight:750;font-size:.9rem}
+        .auth-links {
+            margin-top: auto;
+            display: grid;
+            gap: 10px;
+        }
+
+        .user-card {
+            margin-top: auto;
+            display: none;
+            width: 100%;
+            padding: 18px 16px;
+            border-radius: 18px;
+            background: #f4f9ff;
+            border: 1px solid var(--line);
+            gap: 8px;
+        }
+
+        .user-card strong {
+            display: block;
+            color: #1f2937;
+            font-weight: 900;
+            font-size: 1rem;
+            line-height: 1.25;
+        }
+
+        .user-card span {
+            display: block;
+            color: var(--muted);
+            font-weight: 800;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+        }
+
+        #logoutBtn {
+            width: 100%;
+            min-height: 44px;
+            border: 1px solid #ff9f9f;
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font: inherit;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.18s ease;
+            box-shadow: none;
+        }
+
+        #logoutBtn:hover {
+            background: #fff0f0;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px rgba(239, 68, 68, 0.08);
+        }
         .main { min-width: 0; }
         .topbar {
             height: 72px;

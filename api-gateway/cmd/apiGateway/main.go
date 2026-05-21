@@ -18,28 +18,27 @@ import (
 
 func main() {
 	cfg := config.Load()
-	// Connect to User Service
 	userConn, err := grpc.Dial(cfg.UserServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer userConn.Close()
 	userClient := client.NewUserClient(userConn)
-	// Connect to Room Service
+
 	roomConn, err := grpc.Dial(cfg.RoomServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer roomConn.Close()
 	roomClient := client.NewRoomClient(roomConn)
-	// Connect to Booking Service
+
 	bookingConn, err := grpc.Dial(cfg.BookingServiceAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer bookingConn.Close()
 	bookingClient := client.NewBookingClient(bookingConn)
-	// HTTP Server
+
 	r := gin.Default()
 	r.Use(metrics.PrometheusMiddleware())
 

@@ -83,7 +83,7 @@ func (r *bookingRepository) Cancel(ctx context.Context, id uint, userID uint) er
 	result := r.db.WithContext(ctx).
 		Model(&domain.Booking{}).
 		Where("id = ? AND user_id = ?", id, userID).
-		Update("status", "Cancelled")
+		Update("status", "CANCELLED")
 	if result.Error != nil {
 		return result.Error
 	}
@@ -111,11 +111,10 @@ func (r *bookingRepository) HasConflict(ctx context.Context, roomID uint, startT
 	var count int64
 	err := r.db.WithContext(ctx).
 		Model(&domain.Booking{}).
-		Where("room_id = ? AND status <> ? AND start_time < ? AND end_time > ?", roomID, "Cancelled", endTime, startTime).
+		Where("room_id = ? AND status <> ? AND start_time < ? AND end_time > ?", roomID, "CANCELLED", endTime, startTime).
 		Count(&count).Error
 	return count > 0, err
 }
-
 func (r *bookingRepository) ListAll(ctx context.Context) ([]domain.Booking, error) {
 	var bookings []domain.Booking
 	err := r.db.WithContext(ctx).

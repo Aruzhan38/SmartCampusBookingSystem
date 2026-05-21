@@ -134,11 +134,9 @@ func (u *bookingUsecase) UpdateBookingStatus(ctx context.Context, id uint, statu
 		return nil, err
 	}
 
-	// publish status change event
 	if u.publisher != nil {
 		email := ""
 		if u.userClient != nil {
-			// try to fetch user email
 			uid := strconv.Itoa(int(booking.UserID))
 			if usr, err := u.userClient.GetUserByID(ctx, uid); err == nil {
 				email = usr.Email
